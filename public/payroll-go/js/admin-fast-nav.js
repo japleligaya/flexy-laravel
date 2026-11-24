@@ -1,9 +1,9 @@
-/* Payroll Pro V6 — Progressive, bounded same-origin navigation.
+/* PayrollGo V6 — Progressive, bounded same-origin navigation.
    - Normal Laravel navigation remains the fallback.
    - Only GET links on recognized app pages are enhanced.
    - Authenticated HTML is not persistently cached; hover prefetch expires rapidly.
    - Forms, uploads, downloads, login/logout, and new-tab links stay native.
-   - Diagnose response/render timing with PayrollProPerf in the console.
+   - Diagnose response/render timing with PayrollGoPerf in the console.
 */
 (function () {
   'use strict';
@@ -24,7 +24,7 @@
   document.body.appendChild(indicator);
 
   var metrics = [];
-  window.PayrollProPerf = {
+  window.PayrollGoPerf = {
     latest: function () { return metrics.length ? Object.assign({}, metrics[metrics.length - 1]) : null; },
     results: function () { return metrics.map(function (item) { return Object.assign({}, item); }); },
     initial: function () {
@@ -98,7 +98,7 @@
       redirect: 'follow',
       cache: 'no-store',
       signal: signal,
-      headers: { 'Accept': 'text/html', 'X-Requested-With': 'PayrollProNavigation' }
+      headers: { 'Accept': 'text/html', 'X-Requested-With': 'PayrollGoNavigation' }
     });
     if (!response.ok || !(response.headers.get('content-type') || '').toLowerCase().includes('text/html')) throw new Error('Unexpected response: ' + response.status);
     var returned = allowedUrl(response.url);
@@ -143,7 +143,7 @@
   }
   function render(doc, url, backwards, targetY) {
     var next = safeDocument(doc);
-    if (window.PayrollProCharts && typeof window.PayrollProCharts.destroy === 'function') window.PayrollProCharts.destroy();
+    if (window.PayrollGoCharts && typeof window.PayrollGoCharts.destroy === 'function') window.PayrollGoCharts.destroy();
     // Static Blade pages from this app only. Executable inline scripts are excluded.
     main.innerHTML = next.innerHTML;
     syncShell(doc);

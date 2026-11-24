@@ -3,7 +3,7 @@
   'use strict';
   var choice = 'system';
   try {
-    var stored = localStorage.getItem('payroll-pro-theme');
+    var stored = localStorage.getItem('payroll-go-theme');
     if (stored === 'dark' || stored === 'light' || stored === 'system') choice = stored;
   } catch (_) {}
   var dark = choice === 'dark' || (choice === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);

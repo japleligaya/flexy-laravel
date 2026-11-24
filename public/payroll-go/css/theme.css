@@ -1,5 +1,5 @@
 /*
- * PAYROLL PRO / Flexy-first UI polish v3
+ * PayrollGo / Flexy-first UI polish v3
  * Palette from user-provided visual reference: navy, orange, white.
  * This stylesheet is intentionally scoped and layered AFTER original Flexy CSS.
  * It preserves Flexy's sidebar/page wrappers, JS sidebar toggles, and typography.
@@ -231,7 +231,7 @@ body.payroll-app {background:var(--pro-bg)!important;color:var(--pro-ink)}
 @media(prefers-reduced-motion:reduce){html {scroll-behavior:auto}.payroll-app .pro-page,.payroll-app .page-wrapper,.payroll-app .topbar,.payroll-app .left-sidebar,.payroll-app .btn,.payroll-app .sidebar-link,.pro-stat-card {animation:none!important;transition:none!important}}
 
 /* Consolidated shared appearance controls (previously theme-system.css). */
-/* Layered after the original Flexy CSS and Payroll Pro UI V3.
+/* Layered after the original Flexy CSS and PayrollGo UI V3.
    Subdued shared controls and comprehensive dark palette for admin modules. */
 .pro-theme-select {font:inherit;min-height:36px;padding:8px 26px 8px 11px;border-radius:9px;border:1px solid var(--pro-line,#e3e9f2);color:var(--pro-text,#213b62);background:var(--pro-surface,#fff);font-size:11px;font-weight:750;cursor:pointer}
 .pro-public-link {display:inline-flex;align-items:center;gap:6px;padding:10px 12px;color:#546b88;border:1px solid #e1e9f2;border-radius:9px;font-size:11px;font-weight:800;transition:background-color .18s ease,color .18s ease}
@@ -353,7 +353,7 @@ html[data-bs-theme="dark"] .payroll-app .pro-footer a {color:#e4e6eb}
 @media(prefers-reduced-motion:reduce){.payroll-app .page-wrapper,.payroll-app .left-sidebar,.payroll-app .topbar{transition:none!important}}
 
 /* ================================================================
-   Payroll Pro V5 — unified admin module components
+   PayrollGo V5 — unified admin module components
    Added to the existing single admin theme stylesheet (not another override).
    Uses Flexy's card/table/form primitives and the V4 design tokens.
    ================================================================ */

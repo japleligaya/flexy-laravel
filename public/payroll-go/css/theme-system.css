@@ -1,4 +1,4 @@
-/* Layered after the original Flexy CSS and Payroll Pro UI V3.
+/* Layered after the original Flexy CSS and PayrollGo UI V3.
    Subdued shared controls and comprehensive dark palette for admin modules. */
 .pro-theme-select {font:inherit;min-height:36px;padding:8px 26px 8px 11px;border-radius:9px;border:1px solid var(--pro-line,#e3e9f2);color:var(--pro-text,#213b62);background:var(--pro-surface,#fff);font-size:11px;font-weight:750;cursor:pointer}
 .pro-public-link {display:inline-flex;align-items:center;gap:6px;padding:10px 12px;color:#546b88;border:1px solid #e1e9f2;border-radius:9px;font-size:11px;font-weight:800;transition:background-color .18s ease,color .18s ease}

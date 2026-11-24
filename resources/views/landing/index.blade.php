@@ -4,16 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f7f9fc">
-  <meta name="description" content="Payroll Pro: a focused local workspace for employee records, attendance, payroll periods and CSV reports.">
-  <title>Payroll Pro — Payroll, with a clearer view.</title>
-  <script src="{{ asset('payroll-pro/js/theme-boot.js') }}"></script>
+  <meta name="description" content="PayrollGo: a focused local workspace for employee records, attendance, payroll periods and CSV reports.">
+  <title>PayrollGo — Payroll, with a clearer view.</title>
+  <script src="{{ asset('payroll-go/js/theme-boot.js') }}"></script>
   <link rel="icon" href="{{ asset('flexy/assets/images/logos/favicon.png') }}">
   <link rel="stylesheet" href="{{ asset('flexy/assets/css/styles.css') }}">
-  <link rel="stylesheet" href="{{ asset('payroll-pro/css/brand-tokens.css') }}?v=4">
-  <link rel="stylesheet" href="{{ asset('payroll-pro/css/landing.css') }}?v=4">
-  <link rel="stylesheet" href="{{ asset('payroll-pro/css/qa-polish.css') }}?v=72">
-  <link rel="stylesheet" href="{{ asset('payroll-pro/css/motion-polish.css') }}?v=75">
-  <link rel="stylesheet" href="{{ asset('payroll-pro/css/mobile-motion-v8.css') }}?v=8">
+  <link rel="stylesheet" href="{{ asset('payroll-go/css/brand-tokens.css') }}?v=4">
+  <link rel="stylesheet" href="{{ asset('payroll-go/css/landing.css') }}?v=4">
+  <link rel="stylesheet" href="{{ asset('payroll-go/css/qa-polish.css') }}?v=72">
+  <link rel="stylesheet" href="{{ asset('payroll-go/css/motion-polish.css') }}?v=75">
+  <link rel="stylesheet" href="{{ asset('payroll-go/css/mobile-motion-v8.css') }}?v=8">
 </head>
 <body class="pro-landing">
   <a class="pl-skip" href="#main">Skip to content</a>
@@ -21,9 +21,9 @@
 
   <header class="pl-header" data-site-header>
     <nav class="pl-container pl-nav" aria-label="Main menu">
-      <a href="{{ route('landing') }}" class="pl-brand" aria-label="Payroll Pro home">
+      <a href="{{ route('landing') }}" class="pl-brand" aria-label="PayrollGo home">
         <span class="pl-brand-mark"><i class="ti ti-wallet" aria-hidden="true"></i></span>
-        <span class="pl-brand-words">Payroll<span>PRO</span><small>Business operations</small></span>
+        <span class="pl-brand-words">Payroll<span>Go</span><small>Business operations</small></span>
       </a>
       <button class="pl-menu-button" type="button" data-menu-toggle aria-controls="plMenu" aria-expanded="false" aria-label="Open navigation"><i class="ti ti-menu-2"></i></button>
       <div class="pl-nav-links" id="plMenu" data-menu>
@@ -55,10 +55,10 @@
           <div class="pl-prototype-note"><i class="ti ti-info-circle" aria-hidden="true"></i> Local development prototype — not for live salary disbursements.</div>
         </div>
 
-        <div class="pl-hero-visual" data-reveal data-reveal-delay="1" aria-label="Interactive illustrated preview of Payroll Pro">
+        <div class="pl-hero-visual" data-reveal data-reveal-delay="1" aria-label="Interactive illustrated preview of PayrollGo">
           <div class="pl-visual-orbit" aria-hidden="true"></div>
           <div class="pl-dashboard-window" data-demo-root>
-            <div class="pl-window-top"><div class="pl-window-dots" aria-hidden="true"><i></i><i></i><i></i></div><span><i class="ti ti-lock" aria-hidden="true"></i> Payroll Pro · preview</span><span class="pl-window-mini">DEMO</span></div>
+            <div class="pl-window-top"><div class="pl-window-dots" aria-hidden="true"><i></i><i></i><i></i></div><span><i class="ti ti-lock" aria-hidden="true"></i> PayrollGo · preview</span><span class="pl-window-mini">DEMO</span></div>
             <div class="pl-window-body">
               <aside class="pl-demo-rail" aria-label="Preview modules"><div class="pl-rail-logo"><i class="ti ti-wallet"></i></div><button class="pl-rail-item is-active" type="button" aria-pressed="true" data-demo-tab="overview" aria-label="Preview overview" title="Overview"><i class="ti ti-layout-dashboard"></i></button><button class="pl-rail-item" type="button" aria-pressed="false" data-demo-tab="employees" aria-label="Preview employees" title="Employees"><i class="ti ti-users"></i></button><button class="pl-rail-item" type="button" aria-pressed="false" data-demo-tab="attendance" aria-label="Preview attendance" title="Attendance"><i class="ti ti-calendar-check"></i></button><button class="pl-rail-item" type="button" aria-pressed="false" data-demo-tab="payroll" aria-label="Preview payroll" title="Payroll"><i class="ti ti-wallet"></i></button></aside>
               <div class="pl-demo-main">
@@ -100,14 +100,14 @@
 
     <section class="pl-section pl-workflow-section" id="workflow"><div class="pl-container"><div class="pl-section-top" data-reveal><div><span class="pl-kicker">HOW IT WORKS</span><h2>A clear path from<br><em>team to payroll.</em></h2></div><p>Four straightforward actions connect the main tools you already have. Attendance-based daily drafts are available for configured daily rates; all payroll requires review.</p></div><div class="pl-workflow-grid"><div class="pl-workflow-step" data-reveal><span>01 <i class="ti ti-users"></i></span><h3>Build your team</h3><p>Create departments and register employee profiles.</p></div><div class="pl-workflow-step" data-reveal><span>02 <i class="ti ti-calendar-check"></i></span><h3>Track attendance</h3><p>Record daily statuses and review them by date.</p></div><div class="pl-workflow-step" data-reveal><span>03 <i class="ti ti-wallet"></i></span><h3>Prepare payroll</h3><p>Review daily-rate drafts or manually enter earnings and deductions; finalize after review.</p></div><div class="pl-workflow-step" data-reveal><span>04 <i class="ti ti-file-export"></i></span><h3>Export records</h3><p>Download CSV summaries for your records.</p></div></div></div></section>
 
-    <section class="pl-section pl-faq-section" id="faq"><div class="pl-container pl-faq-grid"><div data-reveal><span class="pl-kicker">QUESTIONS & ANSWERS</span><h2>Good to<br><em>know.</em></h2><p>Payroll Pro is being built step by step. Here's what the current prototype supports.</p></div><div class="pl-faq-list" data-reveal><details><summary>Is this ready for real payroll payments?<i class="ti ti-plus"></i></summary><p>No. This is a local prototype. Payment disbursement and production controls have not been implemented.</p></details><details><summary>Does it calculate SSS, PhilHealth, Pag-IBIG and tax?<i class="ti ti-plus"></i></summary><p>Not yet. The current payroll entries use manually entered earnings and deductions. Statutory rules require separate implementation and verification.</p></details><details><summary>Can I use light, dark and system mode?<i class="ti ti-plus"></i></summary><p>Yes. Choose an appearance from the navigation; your preference is saved in this browser. Dark uses neutral charcoal instead of navy.</p></details><details><summary>Can anyone register as an employee?<i class="ti ti-plus"></i></summary><p>No public self-registration exists yet. Administrator accounts are created through a local server command.</p></details></div></div></section>
+    <section class="pl-section pl-faq-section" id="faq"><div class="pl-container pl-faq-grid"><div data-reveal><span class="pl-kicker">QUESTIONS & ANSWERS</span><h2>Good to<br><em>know.</em></h2><p>PayrollGo is being built step by step. Here's what the current prototype supports.</p></div><div class="pl-faq-list" data-reveal><details><summary>Is this ready for real payroll payments?<i class="ti ti-plus"></i></summary><p>No. This is a local prototype. Payment disbursement and production controls have not been implemented.</p></details><details><summary>Does it calculate SSS, PhilHealth, Pag-IBIG and tax?<i class="ti ti-plus"></i></summary><p>Not yet. The current payroll entries use manually entered earnings and deductions. Statutory rules require separate implementation and verification.</p></details><details><summary>Can I use light, dark and system mode?<i class="ti ti-plus"></i></summary><p>Yes. Choose an appearance from the navigation; your preference is saved in this browser. Dark uses neutral charcoal instead of navy.</p></details><details><summary>Can anyone register as an employee?<i class="ti ti-plus"></i></summary><p>No public self-registration exists yet. Administrator accounts are created through a local server command.</p></details></div></div></section>
 
-    <section class="pl-final-section"><div class="pl-container"><div class="pl-final-card" data-reveal><div><span class="pl-kicker">READY TO EXPLORE?</span><h2>Make work feel<br><em>less complicated.</em></h2><p>Open the workspace and explore the modules available in the local development build.</p></div><a class="pl-button pl-button-primary pl-button-large" href="{{ auth()->check() ? route('dashboard') : route('login') }}">{{ auth()->check() ? 'Open dashboard' : 'Sign in to Payroll Pro' }} <i class="ti ti-arrow-right"></i></a></div></div></section>
+    <section class="pl-final-section"><div class="pl-container"><div class="pl-final-card" data-reveal><div><span class="pl-kicker">READY TO EXPLORE?</span><h2>Make work feel<br><em>less complicated.</em></h2><p>Open the workspace and explore the modules available in the local development build.</p></div><a class="pl-button pl-button-primary pl-button-large" href="{{ auth()->check() ? route('dashboard') : route('login') }}">{{ auth()->check() ? 'Open dashboard' : 'Sign in to PayrollGo' }} <i class="ti ti-arrow-right"></i></a></div></div></section>
   </main>
-  <footer class="pl-footer"><div class="pl-container"><div class="pl-footer-main"><a href="{{ route('landing') }}" class="pl-brand"><span class="pl-brand-mark"><i class="ti ti-wallet"></i></span><span class="pl-brand-words">Payroll<span>PRO</span><small>Business operations</small></span></a><div><a href="#features">Features</a><a href="#showcase">Preview</a><a href="#workflow">Workflow</a><a href="{{ auth()->check() ? route('dashboard') : route('login') }}">{{ auth()->check() ? 'Dashboard' : 'Sign in' }}</a></div></div><div class="pl-footer-bottom"><span>Payroll Pro · Laravel + Flexy UI</span><span>Prototype only · No live payroll processing</span></div></div></footer>
-  <script src="{{ asset('payroll-pro/js/theme-controls.js') }}" defer></script>
-  <script src="{{ asset('payroll-pro/js/landing.js') }}?v=4" defer></script>
-  <script src="{{ asset('payroll-pro/js/motion-polish.js') }}?v=75" defer></script>
-  <script src="{{ asset('payroll-pro/js/mobile-motion-v8.js') }}?v=8" defer></script>
+  <footer class="pl-footer"><div class="pl-container"><div class="pl-footer-main"><a href="{{ route('landing') }}" class="pl-brand"><span class="pl-brand-mark"><i class="ti ti-wallet"></i></span><span class="pl-brand-words">Payroll<span>Go</span><small>Business operations</small></span></a><div><a href="#features">Features</a><a href="#showcase">Preview</a><a href="#workflow">Workflow</a><a href="{{ auth()->check() ? route('dashboard') : route('login') }}">{{ auth()->check() ? 'Dashboard' : 'Sign in' }}</a></div></div><div class="pl-footer-bottom"><span>PayrollGo · Laravel + Flexy UI</span><span>Prototype only · No live payroll processing</span></div></div></footer>
+  <script src="{{ asset('payroll-go/js/theme-controls.js') }}" defer></script>
+  <script src="{{ asset('payroll-go/js/landing.js') }}?v=4" defer></script>
+  <script src="{{ asset('payroll-go/js/motion-polish.js') }}?v=75" defer></script>
+  <script src="{{ asset('payroll-go/js/mobile-motion-v8.js') }}?v=8" defer></script>
 </body>
 </html>

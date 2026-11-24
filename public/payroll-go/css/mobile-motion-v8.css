@@ -1,4 +1,4 @@
-/* Payroll Pro Phase 6 V8 — touchscreen motion. Loaded after V7.5 motion CSS.
+/* PayrollGo Phase 6 V8 — touchscreen motion. Loaded after V7.5 motion CSS.
    Native :hover is deliberately not used on mobile, where hover does not exist. */
 :root { --pm-mobile-press: 150ms; }
 @media (prefers-reduced-motion: no-preference) and (hover: none), (prefers-reduced-motion: no-preference) and (pointer: coarse) {

@@ -11,7 +11,7 @@ class CreatePayrollAdmin extends Command
 {
     protected $signature = 'payroll:create-admin';
 
-    protected $description = 'Create a local admin login for the Payroll Pro learning app';
+    protected $description = 'Create a local admin login for the PayrollGo learning app';
 
     public function handle(): int
     {

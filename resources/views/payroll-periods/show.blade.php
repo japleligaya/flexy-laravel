@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title',$period->label.' | Payroll Pro')
+@section('title',$period->label.' | PayrollGo')
 @section('page-title','Payroll batch review')
 @section('content')
 @php

@@ -10,7 +10,7 @@ use App\Support\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class PayrollProWorkflowTest extends TestCase
+class PayrollGoWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 

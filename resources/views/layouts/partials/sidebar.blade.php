@@ -1,9 +1,9 @@
 <aside class="left-sidebar with-vertical" aria-label="Primary navigation">
     <div class="pro-sidebar-inner">
         <div class="brand-logo d-flex align-items-center justify-content-between">
-            <a href="{{ route(auth()->user()->role==='employee'?'payslips.index':'dashboard') }}" class="logo-img brand-lockup d-flex align-items-center gap-2 text-decoration-none" aria-label="Payroll Pro home">
+            <a href="{{ route(auth()->user()->role==='employee'?'payslips.index':'dashboard') }}" class="logo-img brand-lockup d-flex align-items-center gap-2 text-decoration-none" aria-label="PayrollGo home">
                 <span class="brand-emblem" aria-hidden="true"><i class="ti ti-building-bank"></i></span>
-                <span class="brand-wordmark">Payroll<span>PRO</span><small>Business Operations</small></span>
+                <span class="brand-wordmark">Payroll<span>Go</span><small>Business Operations</small></span>
             </a>
             <a href="javascript:void(0)" class="sidebartoggler ms-auto d-block d-xl-none" aria-label="Close menu"><i class="ti ti-x"></i></a>
         </div>

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', ($employee->exists ? 'Edit employee' : 'Add employee').' | Payroll Pro')
+@section('title', ($employee->exists ? 'Edit employee' : 'Add employee').' | PayrollGo')
 @section('page-title', 'Employee details')
 @section('content')
 <div class="container-fluid pro-page pro-admin-v5">

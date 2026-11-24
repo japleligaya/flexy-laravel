@@ -1,4 +1,4 @@
-/* Payroll Pro V5: progressive enhancement for existing Laravel forms.
+/* PayrollGo V5: progressive enhancement for existing Laravel forms.
    Delegated events work after safe in-app navigation; no custom form submission.
    Server-side validation and payroll calculations remain authoritative. */
 (function () {

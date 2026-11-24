@@ -1,4 +1,4 @@
-/* Payroll Pro V7.5 — progressive pointer/keyboard feedback.
+/* PayrollGo V7.5 — progressive pointer/keyboard feedback.
    Delegated listeners survive existing fetch-based admin navigation.
    No event.preventDefault(), navigation delay, or form interception. */
 (function () {

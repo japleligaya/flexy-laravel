@@ -1,4 +1,4 @@
-/* Payroll Pro charts: mount after each fast navigation and theme change. */
+/* PayrollGo charts: mount after each fast navigation and theme change. */
 (function () {
   'use strict';
   var chart = null;
@@ -50,7 +50,7 @@
     });
     chart.render();
   }
-  window.PayrollProCharts = {mount:mount,destroy:destroy};
+  window.PayrollGoCharts = {mount:mount,destroy:destroy};
   document.addEventListener('payroll:navigated',mount);
   document.addEventListener('payroll:theme-change',function () {if (document.querySelector('#pro-payroll-chart')) mount();});
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',mount);

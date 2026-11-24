@@ -1,4 +1,4 @@
-/* Payroll Pro V8 — mobile tap + viewport motion. No navigation interception.
+/* PayrollGo V8 — mobile tap + viewport motion. No navigation interception.
    Delegated pointer handlers survive fetch-navigation and do not delay clicks. */
 (function () {
   'use strict';

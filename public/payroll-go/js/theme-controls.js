@@ -1,7 +1,7 @@
 /* Shared appearance selection for public site, login and protected workspace. */
 (function () {
   'use strict';
-  var storageKey = 'payroll-pro-theme';
+  var storageKey = 'payroll-go-theme';
   var allowed = { light: true, dark: true, system: true };
   var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   function getChoice() {

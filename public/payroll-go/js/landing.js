@@ -1,4 +1,4 @@
-/* Payroll Pro V4: lightweight public-site interactions. No external animation runtime. */
+/* PayrollGo V4: lightweight public-site interactions. No external animation runtime. */
 (function () {
   'use strict';
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

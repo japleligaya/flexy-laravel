@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Overview | Payroll Pro')
+@section('title', 'Overview | PayrollGo')
 @section('page-title', 'Overview')
 @section('content')
 <div class="container-fluid pro-page">
@@ -17,7 +17,7 @@
 
     <section class="pro-welcome-card" aria-label="Payroll overview intro">
         <div class="pro-welcome-copy">
-            <span class="pro-welcome-kicker"><span class="pro-live-dot"></span> PAYROLL PRO WORKSPACE</span>
+            <span class="pro-welcome-kicker"><span class="pro-live-dot"></span> PayrollGo WORKSPACE</span>
             <h2>Simple. Fast. <span>Reliable.</span></h2>
             <p>Track people, manage attendance, and review manual payroll entries with confidence.</p>
             <a href="{{ route('payroll-periods.index') }}" class="pro-welcome-link">Manage payroll periods <i class="ti ti-arrow-up-right"></i></a>

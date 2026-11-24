@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class PayrollProPhase6Test extends TestCase
+class PayrollGoPhase6Test extends TestCase
 {
     use RefreshDatabase;
 

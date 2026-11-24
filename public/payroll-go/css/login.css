@@ -1,5 +1,5 @@
 /* Login-only styling (preserves working split layout). One stylesheet for login. */
-/* Payroll Pro public site: Flexy-based type + Bootstrap assets, quiet navy/orange direction. */
+/* PayrollGo public site: Flexy-based type + Bootstrap assets, quiet navy/orange direction. */
 :root,
 [data-bs-theme="light"] {
   --pro-bg: #f7f9fc; --pro-surface: #fff; --pro-quiet: #f0f4fa;

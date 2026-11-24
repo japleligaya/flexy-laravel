@@ -1,4 +1,4 @@
-/* Payroll Pro Phase 4: small, GPU-friendly navigation motion. */
+/* PayrollGo Phase 4: small, GPU-friendly navigation motion. */
 .pro-nav-loading{pointer-events:none;position:fixed;inset:0 0 auto 0;height:3px;z-index:20000;opacity:0;transition:opacity .12s ease}
 .pro-nav-loading.is-visible{opacity:1}
 .pro-nav-loading>span{display:block;width:34%;height:100%;background:linear-gradient(90deg,transparent,#df7540,#f0ad85);transform:translateX(-105%);animation:pro-v6-progress .84s ease-in-out infinite}

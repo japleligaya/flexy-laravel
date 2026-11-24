@@ -57,7 +57,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Payroll Pro V9 release
+## PayrollGo V9 release
 
 Implemented directly in the existing workspace on 2026-11-22 (Asia/Manila). This folder has no Git metadata; original application files and a full private SQL backup were preserved before application edits and migration. Existing Flexy assets, employee/attendance CRUD, V8 rate history and retained draft cancellation remain in use.
 
@@ -101,7 +101,7 @@ Real payroll must use an explicitly confirmed company policy and employee classi
 
 ### Windows installation and verification
 
-The additive migration `2026_11_23_000001_add_payroll_engine_workflow` has already been applied to this workspace's `payroll_pro` database. Re-running migration reported nothing pending. Verification preserved all original users (1), employees (1), attendance records (1), payroll periods (2) and payroll entries (0); salary history gained one conservative hire-date backfill. No automated test created live payroll entries or payments.
+The additive migration `2026_11_23_000001_add_payroll_engine_workflow` has already been applied to this workspace's `payroll_go` database. Re-running migration reported nothing pending. Verification preserved all original users (1), employees (1), attendance records (1), payroll periods (2) and payroll entries (0); salary history gained one conservative hire-date backfill. No automated test created live payroll entries or payments.
 
 From `C:\Users\ligay\Projects\flexy-laravel`:
 
@@ -137,8 +137,8 @@ Private backup: `storage/app/private/phase6-backup/`. It contains original appli
 The financial migration is intentionally forward-only: `down()` refuses to delete salary, audit, payment or correction history. **Do not run migrate:rollback as a financial-data rollback.** If rollback is necessary, stop writes (`php artisan down`), take a new backup of the upgraded database, and restore the pre-release SQL into a **separate empty database**. For example, using the real local MySQL account and password prompt:
 
 ```powershell
-& 'C:\xampp\mysql\bin\mysql.exe' -u YOUR_USER -p -e 'CREATE DATABASE payroll_pro_v8_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
-cmd /c '"C:\xampp\mysql\bin\mysql.exe" -u YOUR_USER -p payroll_pro_v8_restore < "C:\Users\ligay\Projects\flexy-laravel\storage\app\private\phase6-backup\database-before.sql"'
+& 'C:\xampp\mysql\bin\mysql.exe' -u YOUR_USER -p -e 'CREATE DATABASE payroll_go_v8_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
+cmd /c '"C:\xampp\mysql\bin\mysql.exe" -u YOUR_USER -p payroll_go_v8_restore < "C:\Users\ligay\Projects\flexy-laravel\storage\app\private\phase6-backup\database-before.sql"'
 ```
 
 Verify the restored records independently, restore the original source copies (remove only added application files identified in the delivery manifest), point a private `.env` copy to the restored database, then run `php artisan config:clear`, `php artisan view:clear`, and `php artisan up`. Retain the upgraded database and its new financial history for reconciliation. Do not overwrite either database or expose backups in `public/`.
