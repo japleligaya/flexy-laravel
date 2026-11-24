@@ -21,10 +21,10 @@ class EmployeeController extends Controller
             ->when($request->filled('q'), function ($query) use ($request) {
                 $text = '%'.addcslashes((string) $request->input('q'), '%_\\').'%';
                 $query->where(function ($q) use ($text) {
-                    $q->where('employee_number', 'like', $text)
-                        ->orWhere('first_name', 'like', $text)
-                        ->orWhere('last_name', 'like', $text)
-                        ->orWhere('email', 'like', $text);
+                    $q->whereLike('employee_number', $text)
+                        ->orWhereLike('first_name', $text)
+                        ->orWhereLike('last_name', $text)
+                        ->orWhereLike('email', $text);
                 });
             })
             ->orderBy('last_name')->orderBy('first_name')->paginate(10)->withQueryString();
