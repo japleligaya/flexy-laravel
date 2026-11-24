@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Payroll periods | PayrollGo')
+@section('title', 'Payroll periods | Payroll Go')
 @section('page-title', 'Payroll periods')
 @section('content')
 <div class="container-fluid pro-page pro-admin-v5 payroll-experience">

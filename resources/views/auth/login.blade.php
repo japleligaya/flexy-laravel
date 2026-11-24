@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="theme-color" content="#f7f9fc">
-  <title>Sign in | PayrollGo</title>
+  <title>Sign in | Payroll Go</title>
   <script src="{{ asset('payroll-go/js/theme-boot.js') }}"></script>
   <link rel="stylesheet" href="{{ asset('flexy/assets/css/styles.css') }}">
   <link rel="stylesheet" href="{{ asset('payroll-go/css/brand-tokens.css') }}?v=4">
@@ -17,9 +17,9 @@
 <body class="pro-login-body">
   <a class="pro-skip" href="#login-form">Skip to sign in</a>
   <div class="pro-login-shell">
-    <section class="pro-login-story" aria-label="About PayrollGo">
+    <section class="pro-login-story" aria-label="About Payroll Go">
       <div class="pro-login-story-top">
-        <a class="pro-brand" href="{{ route('landing') }}" aria-label="PayrollGo home"><span class="pro-brand-icon"><i class="ti ti-building-bank"></i></span><span>Payroll<span class="pro-brand-accent">Go</span><small>Business operations</small></span></a>
+        <a class="pro-brand" href="{{ route('landing') }}" aria-label="Payroll Go home"><span class="pro-brand-icon"><i class="ti ti-building-bank"></i></span><span>Payroll<span class="pro-brand-accent">GO</span><small>Business operations</small></span></a>
         <a href="{{ route('landing') }}" class="pro-quiet-link"><i class="ti ti-arrow-left"></i> Back to website</a>
       </div>
       <div class="pro-login-story-content">
@@ -32,14 +32,14 @@
           <span><i class="ti ti-circle-check"></i> Exportable reports</span>
         </div>
       </div>
-      <div class="pro-login-story-bottom">PayrollGo <span>·</span> Local development prototype</div>
+      <div class="pro-login-story-bottom">Payroll Go <span>·</span> Local development prototype</div>
     </section>
     <section class="pro-login-main" aria-labelledby="login-title">
       <div class="pro-login-toolbar"><label for="loginAppearance">Appearance</label><select id="loginAppearance" class="pro-theme-select" data-theme-select aria-label="Appearance: system, light or dark"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
       <main id="login-form" class="pro-login-form-card">
         <div class="pro-login-form-icon" aria-hidden="true"><i class="ti ti-lock"></i></div>
         <p class="pro-eyebrow">WELCOME BACK</p>
-        <h2 id="login-title">Sign in to PayrollGo</h2>
+        <h2 id="login-title">Sign in to Payroll Go</h2>
         <p class="pro-login-intro">Use your administrator credentials to open the management workspace.</p>
         @if($errors->any())
           <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>

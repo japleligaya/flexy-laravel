@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('payroll-go/css/payroll-experience.css') }}">
     <meta name="theme-color" content="#f7f9fc">
-    <title>@yield('title', 'PayrollGo')</title>
+    <title>@yield('title', 'Payroll Go')</title>
     <script src="{{ asset('payroll-go/js/theme-boot.js') }}"></script>
     <link rel="icon" href="{{ asset('flexy/assets/images/logos/favicon.png') }}">
     <link rel="stylesheet" href="{{ asset('flexy/assets/css/styles.css') }}">
@@ -28,7 +28,7 @@
                 @yield('content')
                 @include('layouts.partials.feature-help')
                 <footer class="pro-footer" aria-label="Footer">
-                    <span>PayrollGo <span class="pro-footer-dot">·</span> Business operations</span>
+                    <span>Payroll Go <span class="pro-footer-dot">·</span> Business operations</span>
                     <span><a href="{{ route('landing') }}">Public website</a> <span class="pro-footer-dot">·</span> Versioned payroll - payment recorded separately</span>
                 </footer>
             </main>

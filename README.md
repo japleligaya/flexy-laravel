@@ -57,7 +57,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## PayrollGo V9 release
+## Payroll Go V9 release
 
 Implemented directly in the existing workspace on 2026-11-22 (Asia/Manila). This folder has no Git metadata; original application files and a full private SQL backup were preserved before application edits and migration. Existing Flexy assets, employee/attendance CRUD, V8 rate history and retained draft cancellation remain in use.
 
