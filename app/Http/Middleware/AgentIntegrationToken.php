@@ -13,10 +13,11 @@ final class AgentIntegrationToken
 {
     public function __construct(private AgentTokenService $tokens) {}
 
-    public function handle(Request $request, Closure $next, string $operation = 'bearer'): Response
+    public function handle(Request $request, Closure $next, string $operation = 'bearer', ?string $permission = null): Response
     {
         if ($operation === 'bearer') {
             $user = $this->tokens->identify($request->bearerToken());
+            abort_if($permission !== null && ! in_array($permission, AgentTokenService::permissions($user), true), 403);
             $request->setUserResolver(fn () => $user);
         } else {
             $this->throttle($request, $operation);

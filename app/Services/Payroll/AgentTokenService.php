@@ -18,7 +18,7 @@ final class AgentTokenService
 
     public function issue(User $user): array
     {
-        $this->requireRead($user);
+        $this->requireEligible($user);
         $now = now()->timestamp;
         $familyExpiry = $now + self::FAMILY_SECONDS;
         [$tokens, $attributes] = $this->newPair($now, $familyExpiry);
@@ -47,7 +47,7 @@ final class AgentTokenService
             ->where('family_expires_at', '>', $now)->value('user_id');
         abort_if($userId === null, 401);
 
-        return $this->requireRead(User::find($userId));
+        return $this->requireEligible(User::find($userId));
     }
 
     public function rotate(#[SensitiveParameter] string $token): array
@@ -59,7 +59,7 @@ final class AgentTokenService
                 ->whereNull('revoked_at')->lockForUpdate()->first();
             $now = now()->timestamp;
             abort_if($current === null || $current->family_expires_at <= $now, 401);
-            $this->requireRead(User::find($current->user_id));
+            $this->requireEligible(User::find($current->user_id));
 
             [$tokens, $attributes] = $this->newPair($now, (int) $current->family_expires_at);
             $rotated = DB::table(self::TABLE)->where('id', $current->id)
@@ -76,10 +76,26 @@ final class AgentTokenService
             ->whereNull('revoked_at')->update(['revoked_at' => now()->timestamp]);
     }
 
-    private function requireRead(?User $user): User
+    public static function permissions(User $user): array
+    {
+        $permissions = array_values(array_filter(
+            ['dashboard', 'people', 'attendance_read', 'attendance', 'salary', 'read', 'payroll', 'export', 'approve', 'pay', 'settings'],
+            fn ($permission) => Access::allows($user, $permission),
+        ));
+        if ($user->employee_id) {
+            $permissions[] = 'own_payslips';
+            if ($user->role === 'employee') {
+                $permissions[] = 'download_own_payslips';
+            }
+        }
+
+        return $permissions;
+    }
+
+    private function requireEligible(?User $user): User
     {
         abort_if($user === null, 401);
-        abort_unless(Access::allows($user, 'read'), 403);
+        abort_unless(self::permissions($user) !== [], 403);
 
         return $user;
     }

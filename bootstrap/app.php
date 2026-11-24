@@ -44,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 403 => ['forbidden', 'PayrollGO access denied.'],
                 404 => ['not_found', 'Resource not found.'],
                 405 => ['method_not_allowed', 'Method not allowed.'],
+                409 => ['conflict', 'The record or confirmation changed. Request a new preview.'],
                 422 => ['invalid_input', 'Invalid request parameters.'],
                 429 => ['rate_limited', 'Too many requests. Try again later.'],
                 default => ['unavailable', 'PayrollGO is unavailable.'],

@@ -21,6 +21,7 @@ class AgentIntegrationApiTest extends TestCase
         $app = parent::createApplication();
         $app['config']->set('cache.stores.database.connection', 'sqlite');
         $app['config']->set('cache.stores.database.table', 'cache');
+        $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
 
         return $app;
     }
@@ -56,7 +57,6 @@ class AgentIntegrationApiTest extends TestCase
 
     public function test_credentials_and_live_read_permission_are_required(): void
     {
-        $this->login($this->account('hr'))->assertForbidden()->assertJsonPath('error.code', 'forbidden');
         $this->login($this->account('employee'))->assertForbidden();
         $user = $this->account('approver');
         $this->postJson(self::API.'/auth/login', ['email' => $user->email, 'password' => 'invalid'])
@@ -67,8 +67,11 @@ class AgentIntegrationApiTest extends TestCase
 
         $tokens = $this->login($user)->assertOk()->json('tokens');
         $user->update(['role' => 'hr']);
-        $this->get(self::API.'/auth/me', $this->bearer($tokens))->assertForbidden();
+        $this->get(self::API.'/auth/me', $this->bearer($tokens))->assertOk();
         $this->get(self::API.'/payroll-periods', $this->bearer($tokens))->assertForbidden();
+        $this->get(self::API.'/departments', $this->bearer($tokens))->assertOk();
+        $tokens = $this->postJson(self::API.'/auth/refresh', ['refresh_token' => $tokens['refresh_token']])->assertOk()->json('tokens');
+        $user->update(['role' => 'employee']);
         $this->postJson(self::API.'/auth/refresh', ['refresh_token' => $tokens['refresh_token']])->assertForbidden();
 
         $user->delete();
@@ -178,6 +181,120 @@ class AgentIntegrationApiTest extends TestCase
         $this->assertDatabaseHas('cache', ['expiration' => now()->timestamp + 60]);
         $this->travel(61)->seconds();
         $this->login($user)->assertOk();
+    }
+
+    public function test_people_attendance_and_payslip_reads_enforce_permissions_and_project_fields(): void
+    {
+        $department = DB::table('departments')->insertGetId(['name' => 'Operations', 'description' => 'Private']);
+        $employee = $this->employee('001', $department);
+        $other = $this->employee('002', $department);
+        $period = $this->cutoff('2026-08-01', '2026-08-15', 'finalized');
+        $ownEntry = DB::table('payroll_entries')->insertGetId(['employee_id' => $employee, 'payroll_period_id' => $period,
+            'base_pay_cents' => 12345, 'snapshot' => '{"net_cents":12345}']);
+        DB::table('payroll_entries')->insert(['employee_id' => $other, 'payroll_period_id' => $period,
+            'base_pay_cents' => 23456, 'snapshot' => '{"net_cents":23456}']);
+        DB::table('attendance_records')->insert(['employee_id' => $employee, 'work_date' => '2026-08-01', 'status' => 'present', 'notes' => 'Private']);
+        $hr = $this->bearer($this->login($this->account('hr'))->assertOk()->json('tokens'));
+        $this->get(self::API.'/capabilities', $hr)->assertOk()->assertExactJson([
+            'permissions' => ['dashboard', 'people', 'attendance_read', 'attendance', 'salary'],
+        ]);
+        $this->get(self::API.'/dashboard', $hr)->assertOk()->assertExactJson(['statistics' => [
+            'active_employees' => 2, 'departments' => 1, 'present_today' => 0, 'draft_periods' => 0,
+        ]]);
+        $this->get(self::API.'/departments?q=operations', $hr)->assertOk()->assertExactJson([
+            'records' => [['id' => (string) $department, 'name' => 'Operations', 'employee_count' => 2]], 'page' => 1, 'has_more' => false,
+        ]);
+        $record = $this->get(self::API."/employees?q=001&active=1&department_id=$department", $hr)->assertOk()->json('records');
+        $this->assertSame([['id' => (string) $employee, 'employee_number' => '001', 'name' => 'Fixture Employee',
+            'department_id' => (string) $department, 'active' => true]], $record);
+        $this->get(self::API.'/attendance?date=2026-08-01&status=present', $hr)->assertOk()
+            ->assertJsonCount(1, 'records')->assertJsonMissingPath('records.0.notes');
+        $this->get(self::API.'/attendance?date=2026-02-30', $hr)->assertUnprocessable();
+        $this->get(self::API.'/salary-rates?employee_id=9223372036854775808', $hr)->assertUnprocessable();
+        $this->get(self::API.'/reports', $hr)->assertForbidden();
+        $linked = $this->account('employee');
+        $linked->update(['employee_id' => $employee]);
+        $personal = $this->bearer($this->login($linked)->assertOk()->json('tokens'));
+        $this->get(self::API.'/payslips', $personal)->assertOk()->assertExactJson([
+            'records' => [['id' => (string) $ownEntry, 'period_id' => (string) $period]], 'page' => 1, 'has_more' => false,
+        ]);
+        $this->get(self::API."/payslips?employee_id=$other", $personal)->assertUnprocessable();
+        $this->get(self::API.'/employees', $personal)->assertForbidden();
+        $linked->update(['employee_id' => null]);
+        $this->get(self::API.'/payslips', $personal)->assertForbidden();
+        $officer = $this->bearer($this->login($this->account())->assertOk()->json('tokens'));
+        $this->get(self::API."/payroll-entries?period_id=$period", $officer)->assertOk()
+            ->assertJsonCount(2, 'records')->assertJsonMissingPath('records.0.snapshot');
+        $this->get(self::API.'/reports', $officer)->assertOk()->assertJsonCount(1, 'records');
+        $this->get(self::API."/salary-rates?employee_id=$employee", $officer)->assertOk()->assertJsonCount(0, 'records');
+        $this->get(self::API."/corrections?period_id=$period", $officer)->assertForbidden();
+        $admin = $this->bearer($this->login($this->account('super_admin'))->assertOk()->json('tokens'));
+        $this->get(self::API."/corrections?period_id=$period", $admin)->assertOk()->assertJsonCount(0, 'records');
+        $this->get(self::API.'/settings', $admin)->assertOk()->assertExactJson(['configured' => false]);
+    }
+
+    public function test_department_preview_binds_actor_arguments_state_and_single_use(): void
+    {
+        $this->freezeTime();
+        $hr = $this->account('hr');
+        $headers = $this->bearer($this->login($hr)->assertOk()->json('tokens'));
+        $peer = $this->bearer($this->login($this->account('hr'))->assertOk()->json('tokens'));
+        $base = self::API.'/departments';
+        $create = ['name' => 'Operations'];
+        $ticket = $this->postJson("$base/create/preview", $create, $headers)->assertOk()->json('ticket');
+        $this->assertDatabaseCount('departments', 0);
+        $this->postJson("$base/create/execute", $create + ['ticket' => $ticket], $peer)->assertConflict();
+        $this->postJson("$base/create/execute", ['name' => 'Other', 'ticket' => $ticket], $headers)->assertConflict();
+        $this->postJson("$base/create/execute", $create, $headers)->assertUnprocessable();
+        $id = $this->postJson("$base/create/execute", $create + ['ticket' => $ticket], $headers)->assertOk()->json('record.id');
+        $this->get("$base/$id", $headers)->assertOk()->assertExactJson(['record' => ['id' => $id, 'name' => 'Operations']]);
+        $this->postJson("$base/create/preview", $create, $headers)->assertUnprocessable();
+
+        $update = ['id' => $id, 'name' => 'Support'];
+        $stale = $this->postJson("$base/update/preview", $update, $headers)->assertOk()->json('ticket');
+        DB::table('departments')->where('id', $id)->update(['description' => 'Edited on website']);
+        $this->postJson("$base/update/execute", $update + ['ticket' => $stale], $headers)->assertConflict();
+        $fresh = $this->postJson("$base/update/preview", $update, $headers)->assertOk()->json('ticket');
+        $hr->update(['role' => 'approver']);
+        $this->postJson("$base/update/execute", $update + ['ticket' => $fresh], $headers)->assertForbidden();
+        $hr->update(['role' => 'hr']);
+        $this->postJson("$base/update/execute", $update + ['ticket' => $fresh], $headers)->assertOk();
+        $this->assertDatabaseHas('departments', ['id' => $id, 'name' => 'Support', 'description' => 'Edited on website']);
+
+        $delete = ['id' => $id];
+        $deleteTicket = $this->postJson("$base/delete/preview", $delete, $headers)->assertOk()->json('ticket');
+        $employee = $this->employee('003', (int) $id);
+        $this->postJson("$base/delete/preview", $delete, $headers)->assertConflict();
+        $this->postJson("$base/delete/execute", $delete + ['ticket' => $deleteTicket], $headers)->assertConflict();
+        $this->assertDatabaseHas('employees', ['id' => $employee, 'department_id' => $id]);
+        DB::table('employees')->where('id', $employee)->update(['department_id' => null]);
+        $this->postJson("$base/delete/execute", $delete + ['ticket' => $deleteTicket], $headers)->assertOk()->assertExactJson(['deleted' => $id]);
+        $this->postJson("$base/create/execute", $create + ['ticket' => $ticket], $headers)->assertConflict();
+        $expiring = $this->postJson("$base/create/preview", $create, $headers)->assertOk()->json('ticket');
+        $this->travel(301)->seconds();
+        $this->postJson("$base/create/execute", $create + ['ticket' => $expiring], $headers)->assertConflict();
+        $this->assertDatabaseCount('departments', 0);
+        $this->assertDatabaseHas('audit_events', ['action' => 'agent_department_delete', 'actor_id' => $hr->id,
+            'subject_id' => $id, 'before' => '[]', 'after' => '[]']);
+    }
+
+    public function test_native_department_form_still_validates_and_preserves_descriptions(): void
+    {
+        $this->actingAs($this->account('hr'));
+        $this->from('/departments')->post('/departments', ['name' => 'Operations', 'description' => 'Native description'])
+            ->assertRedirect('/departments')->assertSessionHasNoErrors();
+        $id = DB::table('departments')->where('name', 'Operations')->value('id');
+        $this->from('/departments')->post('/departments', ['name' => 'Operations'])
+            ->assertRedirect('/departments')->assertSessionHasErrors('name');
+        $this->from('/departments')->put("/departments/$id", ['name' => 'Operations', 'description' => 'Updated description'])
+            ->assertRedirect('/departments')->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('departments', ['id' => $id, 'description' => 'Updated description']);
+    }
+
+    private function employee(string $number, int $department): int
+    {
+        return DB::table('employees')->insertGetId(['employee_number' => $number, 'department_id' => $department,
+            'first_name' => 'Fixture', 'last_name' => 'Employee', 'position' => 'Fixture', 'monthly_salary_cents' => 12345]);
     }
 
     private function account(string $role = 'payroll_officer'): User
