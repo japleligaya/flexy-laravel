@@ -100,6 +100,10 @@ return [
             'search_path' => 'public',
             'sslmode' => env('NEON_DATABASE_URL') ? 'verify-full' : env('DB_SSLMODE', 'prefer'),
             'sslrootcert' => env('DB_SSLROOTCERT'),
+            // One-shot parameterized queries keep PDO statement state out of Neon's transaction pool.
+            'options' => env('NEON_DATABASE_URL') && extension_loaded('pdo_pgsql') ? [
+                (PHP_VERSION_ID >= 80400 ? \Pdo\Pgsql::ATTR_DISABLE_PREPARES : PDO::PGSQL_ATTR_DISABLE_PREPARES) => true,
+            ] : [],
         ],
 
         'sqlsrv' => [
