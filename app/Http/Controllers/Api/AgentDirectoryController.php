@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 final class AgentDirectoryController
 {
@@ -106,6 +107,35 @@ final class AgentDirectoryController
 
         return $this->page($rows, $query, fn (SalaryRate $row) => [
             'id' => (string) $row->id, 'effective_on' => $row->effective_on->toDateString(), 'basis' => $row->basis,
+        ]);
+    }
+
+    public function salaryDetails(Request $request): JsonResponse
+    {
+        $query = $this->paging($request, ['employee_id' => $this->idRule()]);
+        Employee::select('id')->findOrFail($query['employee_id']);
+        $rows = SalaryRate::select('id', 'effective_on', 'basis', 'amount_cents', 'reason')
+            ->where('employee_id', $query['employee_id'])->orderByDesc('effective_on');
+
+        return $this->page($rows, $query, fn (SalaryRate $row) => [
+            'id' => (string) $row->id, 'effective_on' => $row->effective_on->toDateString(), 'basis' => $row->basis,
+            'amount_cents' => (int) $row->amount_cents, 'reason' => $row->reason,
+        ]);
+    }
+
+    public function auditEvents(Request $request): JsonResponse
+    {
+        $query = $this->paging($request);
+        $page = (int) ($query['page'] ?? 1);
+        $rows = DB::table('audit_events')->orderByDesc('id')->simplePaginate(10,
+            ['id', 'action', 'subject_type', 'subject_id', 'created_at'], 'page', $page);
+
+        return response()->json([
+            'records' => $rows->getCollection()->map(fn ($event) => [
+                'id' => (string) $event->id, 'action' => $event->action, 'subject_type' => $event->subject_type,
+                'subject_id' => $event->subject_id === null ? null : (string) $event->subject_id,
+                'created_at' => $event->created_at,
+            ])->all(), 'page' => $page, 'has_more' => $rows->hasMorePages(),
         ]);
     }
 

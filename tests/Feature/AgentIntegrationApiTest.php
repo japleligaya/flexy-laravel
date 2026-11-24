@@ -291,6 +291,67 @@ class AgentIntegrationApiTest extends TestCase
         $this->assertDatabaseHas('departments', ['id' => $id, 'description' => 'Updated description']);
     }
 
+    public function test_routine_agent_operations_preserve_validation_receipts_and_document_ownership(): void
+    {
+        $hr = $this->bearer($this->login($this->account('hr'))->assertOk()->json('tokens'));
+        $officer = $this->bearer($this->login($this->account())->assertOk()->json('tokens'));
+        $mutate = function (string $path, array $data, array $headers): TestResponse {
+            $preview = $this->postJson(self::API.$path.'/preview', $data, $headers)->assertOk();
+
+            return $this->postJson(self::API.$path.'/execute', $data + ['ticket' => $preview->json('ticket')], $headers);
+        };
+        $person = ['employee_number' => 'T-008', 'first_name' => 'Fixture', 'last_name' => 'Person',
+            'position' => 'Testing', 'is_active' => '1', 'monthly_salary' => '0'];
+        $this->postJson(self::API.'/employees/create/preview', ['monthly_salary' => '500'] + $person, $hr)->assertUnprocessable();
+        $employee = $mutate('/employees/create', $person, $hr)->assertOk()->json('record.id');
+        $this->assertDatabaseCount('salary_rates', 0);
+        $this->get(self::API."/employees/$employee", $hr)->assertOk()->assertJsonMissingPath('record.monthly_salary');
+        $mutate('/employees/update', ['id' => $employee, 'position' => 'QA'], $hr)->assertOk()->assertJsonPath('record.position', 'QA');
+        $this->postJson(self::API.'/employees/update/preview', ['id' => $employee, 'monthly_salary' => '900'], $hr)->assertUnprocessable();
+        $other = $mutate('/employees/create', ['employee_number' => 'T-009'] + $person, $hr)->assertOk()->json('record.id');
+
+        $day = ['employee_id' => $employee, 'work_date' => '2026-08-04', 'status' => 'present'];
+        $attendance = $mutate('/routine/attendance-create', $day, $hr)->assertOk()->json('record.id');
+        $this->postJson(self::API.'/routine/attendance-create/preview', $day, $hr)->assertConflict();
+        $this->postJson(self::API.'/employees/delete/preview', ['id' => $employee], $hr)->assertConflict();
+        $mutate('/routine/attendance-delete', ['id' => $attendance], $hr)->assertOk()->assertJsonPath('deleted', $attendance);
+        $this->get(self::API."/verified-attendance/$attendance", $hr)->assertNotFound();
+        $mutate('/employees/delete', ['id' => $other], $hr)->assertOk()->assertJsonPath('deleted', $other);
+
+        $cutoff = ['label' => 'Fixture cutoff', 'starts_on' => '2026-08-01', 'ends_on' => '2026-08-15'];
+        $this->postJson(self::API.'/routine/period-create/preview', $cutoff, $hr)->assertForbidden();
+        $period = $mutate('/routine/period-create', $cutoff, $officer)->assertOk()->assertJsonPath('record.status', 'draft')->json('record.id');
+        $this->postJson(self::API.'/routine/period-create/preview', $cutoff, $officer)->assertUnprocessable();
+        $mutate('/routine/engine-generate', ['id' => $period], $officer)->assertOk()->assertJsonPath('created', 1);
+        $mutate('/routine/engine-generate', ['id' => $period], $officer)->assertOk()->assertJsonPath('created', 0);
+        $this->get(self::API."/verified-drafts/$period", $officer)->assertOk()->assertJsonPath('entry_count', 1);
+        $mutate('/routine/period-cancel', ['id' => $period, 'reason' => 'Fixture cancelled'], $officer)
+            ->assertOk()->assertJsonPath('record.status', 'cancelled');
+        $this->get(self::API."/documents/report/$period", $officer)->assertOk()->assertExactJson(['document_id' => $period]);
+
+        $simulation = ['starts_on' => '2026-08-01', 'ends_on' => '2026-08-15', 'frequency' => 'monthly',
+            'proration' => 'calendar_days', 'monthly_attendance' => 'not_required', 'hours_per_day' => 8, 'workdays' => [1, 2, 3, 4, 5]];
+        $before = DB::table('payroll_entries')->count();
+        $response = $this->get(self::API.'/simulation?'.http_build_query($simulation), $officer)->assertOk()->json('records.0');
+        $web = app(\App\Services\Payroll\PayrollSimulation::class)->calculate(app(\App\Services\Payroll\PayrollEngine::class), $simulation);
+        $this->assertSame($web['rows'][0]['entry']->net_pay_cents, $response['net_cents']);
+        $this->assertDatabaseCount('payroll_entries', $before);
+
+        $finalized = $this->cutoff('2026-08-16', '2026-08-31', 'finalized');
+        $entry = DB::table('payroll_entries')->insertGetId(['payroll_period_id' => $finalized, 'employee_id' => $employee,
+            'base_pay_cents' => 12000, 'snapshot' => '{"net_cents":12000}']);
+        $holder = $this->account('employee');
+        $holder->update(['employee_id' => $employee]);
+        $own = $this->bearer($this->login($holder)->assertOk()->json('tokens'));
+        $this->get(self::API.'/documents/payslip', $own)->assertOk()->assertExactJson(['document_id' => (string) $entry]);
+        $this->get(self::API.'/documents/payslip', $hr)->assertForbidden();
+        $this->get(self::API.'/documents/payslip/999999', $own)->assertNotFound();
+        $this->get(self::API."/salary-rate-details?employee_id=$employee", $hr)->assertOk()->assertJsonCount(0, 'records');
+        $this->get(self::API.'/audit-events', $hr)->assertForbidden();
+        $admin = $this->bearer($this->login($this->account('super_admin'))->assertOk()->json('tokens'));
+        $this->get(self::API.'/audit-events', $admin)->assertOk()->assertJsonMissingPath('records.0.before');
+    }
+
     private function employee(string $number, int $department): int
     {
         return DB::table('employees')->insertGetId(['employee_number' => $number, 'department_id' => $department,

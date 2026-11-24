@@ -8,7 +8,6 @@ use App\Services\Payroll\Audit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AttendanceController extends Controller
@@ -25,16 +24,7 @@ class AttendanceController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'employee_id' => ['required', 'integer', Rule::exists('employees', 'id')->where('is_active', true)],
-            'work_date' => ['required', 'date'],
-            'status' => ['required', Rule::in(['present', 'absent', 'leave'])],
-            'notes' => ['nullable', 'string', 'max:500'],
-            'time_in' => ['nullable', 'date'],
-            'time_out' => ['nullable', 'date', 'after:time_in'],
-            'overtime_minutes' => ['sometimes', 'integer', 'between:0,960'],
-            'leave_type' => ['nullable', 'string', 'max:60'],
-        ]);
+        $data = $request->validate(AttendanceRecord::rules());
         $existing = AttendanceRecord::where('employee_id', $data['employee_id'])
             ->whereDate('work_date', $data['work_date'])->first();
         if ($existing) {

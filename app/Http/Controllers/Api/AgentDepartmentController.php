@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Department;
-use App\Models\User;
-use App\Services\Payroll\Access;
+use App\Services\Payroll\AgentMutation;
 use App\Services\Payroll\Audit;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 final class AgentDepartmentController
@@ -19,10 +16,10 @@ final class AgentDepartmentController
         abort_unless($request->query() === [] && preg_match('/\A[1-9][0-9]{0,18}\z/', $id) &&
             filter_var($id, FILTER_VALIDATE_INT), 422);
 
-        return response()->json(['record' => $this->record(Department::select('id', 'name')->findOrFail($id))]);
+        return response()->json(['record' => $this->record(Department::findOrFail($id))]);
     }
 
-    public function __invoke(Request $request, string $operation, string $stage): JsonResponse
+    public function __invoke(Request $request, string $operation, string $stage, AgentMutation $mutations): JsonResponse
     {
         abort_unless($request->isJson() && $request->query() === [], 422);
         $execute = $stage === 'execute';
@@ -32,65 +29,41 @@ final class AgentDepartmentController
         }
         if ($operation !== 'delete') {
             $rules['name'] = ['required', 'string', 'max:255'];
+            $rules['description'] = Department::rules()['description'];
         }
         if ($execute) {
-            $rules['ticket'] = ['required', 'string', 'regex:/\A[0-9]{1,12}\.[a-f0-9]{32}\.[a-f0-9]{64}\z/'];
+            $rules['ticket'] = ['required', 'string', AgentMutation::TICKET_RULE];
         }
         $body = $request->json()->all();
         abort_if(array_diff_key($body, $rules) !== [], 422);
         $data = Validator::make($body, $rules)->validate();
+        $ticket = $data['ticket'] ?? null;
+        unset($data['ticket']);
+        $user = $request->user();
 
-        try {
-            return DB::transaction(function () use ($request, $operation, $execute, $data) {
-                $actor = $request->user()->getKey();
-                $userQuery = User::whereKey($actor);
-                abort_unless(Access::allows(($execute ? $userQuery->lockForUpdate() : $userQuery)->first(), 'people'), 403);
+        return response()->json($mutations->run($user, 'people', $operation, $data, $ticket,
+            function (bool $lock) use ($operation, $data, $user) {
                 $department = isset($data['id']) ? Department::whereKey($data['id']) : null;
-                $target = $department ? ($execute ? $department->lockForUpdate() : $department)->firstOrFail() : null;
-                $attributes = isset($data['name']) ? ['name' => $data['name']] : [];
+                $target = $department ? ($lock ? $department->lockForUpdate() : $department)->firstOrFail() : null;
+                $attributes = array_intersect_key($data, ['name' => true, 'description' => true]);
                 if ($operation === 'delete') {
                     abort_if($target->employees()->exists(), 409);
                 }
-                $revision = $target ? $target->getRawOriginal() : null;
-                if (! $execute) {
-                    $this->validateName($attributes, $target);
-                    $expires = now()->timestamp + 300;
-                    $nonce = bin2hex(random_bytes(16));
-                    $signature = $this->sign([$actor, $operation, $data, $revision, $expires, $nonce]);
-
-                    return response()->json(['ticket' => "$expires.$nonce.$signature",
-                        'target' => $target ? $this->record($target) : null]);
-                }
-                [$expires, $nonce, $signature] = explode('.', $data['ticket']);
-                unset($data['ticket']);
-                $now = now()->timestamp;
-                abort_unless((int) $expires > $now &&
-                    hash_equals($this->sign([$actor, $operation, $data, $revision, (int) $expires, $nonce]), $signature), 409);
-                $receipts = DB::table('agent_department_receipts');
-                $expired = (clone $receipts)->where('expires_at', '<=', $now)->orderBy('expires_at')->limit(100)->pluck('nonce');
-                if ($expired->isNotEmpty()) {
-                    (clone $receipts)->whereIn('nonce', $expired)->delete();
-                }
-                abort_unless($receipts->insertOrIgnore(['nonce' => $nonce, 'expires_at' => (int) $expires]) === 1, 409);
                 $this->validateName($attributes, $target);
-                if ($operation === 'delete') {
-                    $target->delete();
-                    Audit::record('agent_department_delete', $target, actorId: $actor);
 
-                    return response()->json(['deleted' => (string) $target->id]);
-                }
-                if ($target) {
-                    $target->update($attributes);
-                } else {
-                    $target = Department::create($attributes);
-                }
-                Audit::record('agent_department_'.$operation, $target, actorId: $actor);
+                return [$target ? $this->record($target) : null, $target?->getRawOriginal(), function () use ($operation, $target, $attributes, $user) {
+                    if ($operation === 'delete') {
+                        $target->delete();
+                    } elseif ($target) {
+                        $target->update($attributes);
+                    } else {
+                        $target = Department::create($attributes);
+                    }
+                    Audit::record('agent_department_'.$operation, $target, actorId: $user->getKey());
 
-                return response()->json(['record' => $this->record($target)]);
-            }, 3);
-        } catch (UniqueConstraintViolationException) {
-            abort(409);
-        }
+                    return $operation === 'delete' ? ['deleted' => (string) $target->id] : ['record' => $this->record($target)];
+                }];
+            }));
     }
 
     private function validateName(array $attributes, ?Department $target): void
@@ -100,16 +73,9 @@ final class AgentDepartmentController
         }
     }
 
-    private function sign(array $payload): string
-    {
-        $key = config('app.key');
-        abort_unless(is_string($key) && $key !== '', 503);
-
-        return hash_hmac('sha256', json_encode($payload, JSON_THROW_ON_ERROR), $key);
-    }
-
     private function record(Department $department): array
     {
-        return ['id' => (string) $department->id, 'name' => $department->name];
+        return ['id' => (string) $department->id, 'name' => $department->name] +
+            ($department->description === null ? [] : ['description' => $department->description]);
     }
 }

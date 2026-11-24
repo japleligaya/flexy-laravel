@@ -24,11 +24,15 @@ final class PayrollWorkflow
         return PayrollPeriod::whereKey($period->id)->lockForUpdate()->firstOrFail();
     }
 
-    public function generate(PayrollPeriod $period): int
+    public function generate(PayrollPeriod $period, ?\App\Models\User $actor = null): int
     {
-        Access::check('payroll');
+        if ($actor === null) {
+            Access::check('payroll');
+        } else {
+            abort_unless(Access::allows($actor, 'payroll'), 403);
+        }
 
-        return DB::transaction(function () use ($period) {
+        return DB::transaction(function () use ($period, $actor) {
             $period = $this->locked($period);
             if (! $period->isDraft()) {
                 $this->fail('Only draft periods can be generated.');
@@ -42,7 +46,7 @@ final class PayrollWorkflow
                 $period->entries()->create(['employee_id' => $employee->id, 'source' => 'engine', 'calculation' => $calculation] + $this->money($calculation));
                 $count++;
             }
-            Audit::record('batch_generated', $period, [], ['created' => $count]);
+            Audit::record('batch_generated', $period, [], ['created' => $count], $actor?->getKey());
 
             return $count;
         }, 3);

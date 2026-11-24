@@ -16,12 +16,17 @@ final class PayrollEngine
 {
     public function employees(PayrollPeriod $period)
     {
+        return $this->employeeQuery($period)->get();
+    }
+
+    public function employeeQuery(PayrollPeriod $period)
+    {
         return Employee::where(function ($q) {
             $q->where('is_active', true)->orWhereNotNull('ended_on');
         })
             ->where(fn ($q) => $q->whereNull('hired_on')->orWhereDate('hired_on', '<=', $period->ends_on))
             ->where(fn ($q) => $q->whereNull('ended_on')->orWhereDate('ended_on', '>=', $period->starts_on))
-            ->orderBy('id')->get();
+            ->orderBy('id');
     }
 
     public function calculate(Employee $employee, PayrollPeriod $period, array $overrides = [], ?array $simulationPolicy = null): array

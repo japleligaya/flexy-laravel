@@ -9,11 +9,10 @@ use App\Models\PayrollPeriod;
 use App\Models\PayrollSetting;
 use App\Services\Payroll\PayrollEngine;
 use App\Services\Payroll\PayrollWorkflow;
-use Carbon\CarbonImmutable;
+use App\Services\Payroll\CutoffDraft;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PayrollPeriodController extends Controller
@@ -28,24 +27,7 @@ class PayrollPeriodController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'label' => ['required', 'string', 'max:255'],
-            'starts_on' => ['required', 'date'],
-            'ends_on' => ['required', 'date', 'after_or_equal:starts_on'],
-        ]);
-        if (CarbonImmutable::parse($data['starts_on'])->diffInDays(CarbonImmutable::parse($data['ends_on'])) > 30) {
-            throw ValidationException::withMessages(['ends_on' => 'A payroll cutoff may contain at most 31 calendar dates.']);
-        }
-        $period = DB::transaction(function () use ($data) {
-            DB::table('payroll_locks')->where('id', 1)->lockForUpdate()->first();
-            $overlap = PayrollPeriod::whereDate('starts_on', '<=', $data['ends_on'])
-                ->whereDate('ends_on', '>=', $data['starts_on'])->where('status', '!=', 'cancelled')->exists();
-            if ($overlap) {
-                throw ValidationException::withMessages(['starts_on' => 'This period overlaps an existing payroll period.']);
-            }
-
-            return PayrollPeriod::create($data + ['status' => 'draft']);
-        }, 3);
+        $period = app(CutoffDraft::class)->create($request->validate(CutoffDraft::rules()));
 
         return redirect()->route('payroll-periods.show', $period)->with('success', 'Draft payroll period created.');
     }
@@ -88,15 +70,7 @@ class PayrollPeriodController extends Controller
         ]);
         DB::transaction(function () use ($payrollPeriod, $data, $request) {
             $period = PayrollPeriod::whereKey($payrollPeriod->id)->lockForUpdate()->firstOrFail();
-            if (! $period->isDraft()) {
-                throw ValidationException::withMessages(['period' => 'Only draft payroll periods can be cancelled. Finalized and cancelled periods are locked.']);
-            }
-            $period->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-                'cancelled_by' => $request->user()->getAuthIdentifier(),
-                'cancellation_reason' => $data['reason'],
-            ]);
+            app(CutoffDraft::class)->cancel($period, $data['reason'], $request->user()->getAuthIdentifier());
         });
 
         return redirect()->route('payroll-periods.index')

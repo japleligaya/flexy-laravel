@@ -4,12 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Employee;
-use App\Models\PayrollAdjustment;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -76,7 +74,7 @@ class EmployeeController extends Controller
 
     public function destroy(Employee $employee): RedirectResponse
     {
-        if ($employee->payrollEntries()->exists() || $employee->attendanceRecords()->exists() || $employee->salaryRates()->exists() || PayrollAdjustment::where('employee_id', $employee->id)->exists()) {
+        if ($employee->hasPayrollHistory()) {
             return back()->with('error', 'Employee has payroll/attendance/salary-rate history. Set employee to inactive instead.');
         }
         $employee->delete();
@@ -86,21 +84,7 @@ class EmployeeController extends Controller
 
     private function validated(Request $request, ?Employee $employee = null): array
     {
-        $data = $request->validate([
-            'employee_number' => ['required', 'string', 'max:32', Rule::unique('employees', 'employee_number')->ignore($employee)],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('employees', 'email')->ignore($employee)],
-            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
-            'position' => ['required', 'string', 'max:255'],
-            'monthly_salary' => ['required', 'regex:/^\d{1,9}(?:\.\d{1,2})?$/D'],
-            'hired_on' => ['nullable', 'date'],
-            'ended_on' => ['nullable', 'date', 'after_or_equal:hired_on'],
-            'payroll_classification' => ['sometimes', Rule::in(['unverified', 'standard_private_regular'])],
-            'initial_effective_on' => ['nullable', 'date'],
-            'initial_basis' => ['sometimes', Rule::in(['daily', 'monthly'])],
-            'is_active' => ['required', Rule::in(['0', '1'])],
-        ]);
+        $data = $request->validate(Employee::rules($employee));
         $data['monthly_salary_cents'] = Money::toCents((string) $data['monthly_salary']);
         unset($data['initial_effective_on'], $data['initial_basis']);
         $data['is_active'] = $data['is_active'] === '1';
