@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Database\NeonPostgresConnector;
 use App\Models\AttendanceRecord;
 use App\Models\Employee;
 use App\Models\PayrollAdjustment;
@@ -23,7 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if ($this->app['config']->get('database.connections.pgsql.neon')) {
+            $this->app->bind('db.connector.pgsql', NeonPostgresConnector::class);
+        }
     }
 
     /**

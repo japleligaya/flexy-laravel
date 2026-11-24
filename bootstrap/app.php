@@ -25,7 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         if ($_SERVER['FLEXY_VERCEL_ENTRYPOINT'] ?? false) {
             $exceptions->report(function (QueryException $exception): void {
-                logger()->error('Database query failed.', ['sqlstate' => $exception->getCode()]);
+                $cause = strtolower($exception->getPrevious()?->getMessage() ?? '');
+                $reason = match (true) {
+                    str_contains($cause, 'endpoint id is not specified') => 'Neon endpoint identification',
+                    str_contains($cause, 'certificate') => 'TLS certificate validation',
+                    str_contains($cause, 'authentication failed') => 'database authentication',
+                    str_contains($cause, 'could not translate host name') => 'database name resolution',
+                    str_contains($cause, 'connection timed out') => 'database connection timeout',
+                    default => 'database error',
+                };
+                logger()->error('Database query failed.', ['sqlstate' => $exception->getCode(), 'reason' => $reason]);
             })->stop();
         }
     })->create();

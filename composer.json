@@ -35,6 +35,7 @@
         "vercel": [
             "@composer check-platform-reqs --no-dev --lock",
             "@php -r \"exit(extension_loaded('pdo_pgsql') ? 0 : 1);\"",
+            "node scripts/vercel-ca.mjs",
             "@php artisan package:discover --ansi",
             "npm ci --include=dev",
             "npm run build"
