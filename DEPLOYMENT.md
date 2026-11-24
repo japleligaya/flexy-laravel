@@ -2,20 +2,20 @@
 
 Use Node.js 22, the Other framework preset, and the repository root. The community PHP runtime installs Composer dependencies from the lockfile and checks its PHP extensions before building the function. The Vercel build publishes the Vite output and the existing public assets. Laravel uses HTTPS from Vercel's proxy and temporary disk space for compiled views and PDF generation.
 
-1. Provision an empty managed MySQL 8 staging database, such as DigitalOcean Managed MySQL. Require verified TLS, allow connectivity from Vercel, and give the application account access only to the staging schema. Store dummy payroll records there.
-2. Use a secure shell to export the staging database settings listed below. Set `MYSQL_ATTR_SSL_CA` to the provider CA file path for this shell. Confirm the connection points to the empty staging schema, then run `php artisan migrate --force` and `php artisan payroll:create-admin` to create a staging-only login. Use an account with schema privileges for migrations and a separate runtime account with data privileges. Generate one staging application key with `php artisan key:generate --show` and store it directly in Vercel's encrypted environment settings.
-3. Import the private GitHub repository into Vercel. Enable Deployment Protection for the staging project. Add the settings below to Preview before deploying. Use a stable HTTPS staging hostname for `APP_URL` and leave `ASSET_URL` unset for same-origin assets.
-4. Run `vercel deploy` for a preview. Check `/up`, `/`, `/login`, a CSS asset, secure session cookies, login with the staging account, and a PDF download from a dummy finalized snapshot. Confirm that `/.env`, `/composer.json`, and `/storage/logs/laravel.log` return 404 after passing Deployment Protection.
+1. Use the dedicated Flexy staging branch in Neon Singapore with synthetic records. Use a direct connection with the schema owner for `php artisan migrate --force` and `php artisan payroll:create-admin`. Give the pooled runtime role table and sequence privileges in the staging schema.
+2. For local staging verification, use a separate ignored environment file, a PHP CLI with `pdo_pgsql` and a current libpq, and `DB_SSLROOTCERT` pointing to a trusted CA bundle. Some older Windows libpq builds need the Neon endpoint ID passed as a libpq connection option. The regular local XAMPP/MySQL configuration stays in `.env`.
+3. Link the checkout to `flexy-laravel` in Vercel, select Node.js 22, and enable Vercel Authentication with Standard Protection. Set the variables below in Preview. Generate a staging key with `php artisan key:generate --show` and store it in the encrypted environment settings. Leave `ASSET_URL` unset for same-origin assets.
+4. Run `vercel deploy` for a preview in Singapore. Check `/up`, `/`, `/login`, static assets, secure cookies, an authenticated dashboard, and a PDF download from a dummy finalized snapshot. Confirm that `/.env`, `/composer.json`, and `/storage/logs/laravel.log` return 404 after passing Deployment Protection.
 
 | Environment variable | Staging setting |
 | --- | --- |
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
 | `APP_KEY` | Stable, staging-only generated key |
-| `APP_URL` | Stable HTTPS staging URL |
-| `DB_CONNECTION` | `mysql` |
-| `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Hosted staging database connection |
-| `MYSQL_SSL_CA_PEM` | Provider CA certificate contents, including the PEM delimiters |
+| `APP_URL` | Optional HTTPS staging hostname. Defaults to the HTTPS URL derived from Vercel's `VERCEL_URL`. |
+| `DB_CONNECTION` | `pgsql` |
+| `NEON_DATABASE_URL` | Pooled staging runtime URL. Laravel enforces `verify-full` for this setting. |
+| `DB_SSLROOTCERT` | Runtime CA bundle, typically `/etc/pki/tls/certs/ca-bundle.crt` on Vercel |
 | `SESSION_DRIVER` | `database` |
 | `SESSION_SECURE_COOKIE`, `SESSION_ENCRYPT` | `true` |
 | `CACHE_STORE` | `database` |
