@@ -1,0 +1,11 @@
+/* Payroll Pro Phase 4: small, GPU-friendly navigation motion. */
+.pro-nav-loading{pointer-events:none;position:fixed;inset:0 0 auto 0;height:3px;z-index:20000;opacity:0;transition:opacity .12s ease}
+.pro-nav-loading.is-visible{opacity:1}
+.pro-nav-loading>span{display:block;width:34%;height:100%;background:linear-gradient(90deg,transparent,#df7540,#f0ad85);transform:translateX(-105%);animation:pro-v6-progress .84s ease-in-out infinite}
+@keyframes pro-v6-progress{to{transform:translateX(380%)}}
+.payroll-app #main-content:focus{outline:none}
+.payroll-app #main-content.pro-page-in>.container-fluid{animation:pro-v6-enter .18s cubic-bezier(.2,.65,.3,1) both}
+@keyframes pro-v6-enter{from{opacity:.78;transform:translate3d(0,4px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+/* Feedback should begin at pointer contact without jumping the layout. */
+.payroll-app #sidebarnav .sidebar-link,.payroll-app .btn{transition-property:background-color,border-color,color,box-shadow;transition-duration:.15s;transition-timing-function:ease}
+@media(prefers-reduced-motion:reduce){.pro-nav-loading>span,.payroll-app #main-content.pro-page-in>.container-fluid{animation:none!important;transition:none!important}}

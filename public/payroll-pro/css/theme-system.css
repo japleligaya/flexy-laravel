@@ -1,0 +1,221 @@
+/* Layered after the original Flexy CSS and Payroll Pro UI V3.
+   Subdued shared controls and comprehensive dark palette for admin modules. */
+.pro-theme-select {font:inherit;min-height:36px;padding:8px 26px 8px 11px;border-radius:9px;border:1px solid var(--pro-line,#e3e9f2);color:var(--pro-text,#213b62);background:var(--pro-surface,#fff);font-size:11px;font-weight:750;cursor:pointer}
+.pro-public-link {display:inline-flex;align-items:center;gap:6px;padding:10px 12px;color:#546b88;border:1px solid #e1e9f2;border-radius:9px;font-size:11px;font-weight:800;transition:background-color .18s ease,color .18s ease}
+.pro-public-link:hover {color:#092D73;background:#f2f5fa}
+.payroll-app .pro-footer a {color:inherit;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .2s ease}
+.payroll-app .pro-footer a:hover {text-decoration-color:currentColor}
+.payroll-app .pro-theme-select {min-width:90px}
+.payroll-app .topbar .navbar {gap:12px}
+.payroll-app :focus-visible, .payroll-login :focus-visible {outline:3px solid #de8e57;outline-offset:3px}
+/* Dark appearance: overrides the intentionally light-only color values from V3.
+   Keep original Flexy layouts/sizes; never alter controller-driven page structure. */
+html[data-bs-theme="dark"] {
+  --bs-primary:#89b4ff;
+  --bs-primary-rgb:152,184,237;
+  --bs-body-color:#e4e6eb;
+  --bs-body-bg:#18191a;
+  --bs-border-color:#3e4042;
+  --bs-secondary-bg:#303134;
+  --bs-tertiary-bg:#242526;
+  --bs-primary-bg-subtle:#3a3b3c;
+  --pro-bg:#18191a;--pro-white:#242526;
+  --pro-ink:#e4e6eb;--pro-muted:#b0b3b8;--pro-line:#3e4042;
+  --pro-navy:#89b4ff;--pro-deep:#242526;--pro-orange:#ed9869;
+  --pro-orange-deep:#eb8e5b;--pro-shadow:0 10px 35px rgba(0,0,0,.12);
+  --pro-surface:#242526;--pro-text:#e4e6eb;--pro-quiet:#303134;
+}
+html[data-bs-theme="dark"] body.payroll-app,
+html[data-bs-theme="dark"] .payroll-app .page-wrapper {background:#18191a!important;color:#e4e6eb}
+html[data-bs-theme="dark"] .payroll-app .topbar {background:#242526!important;border-bottom:1px solid #3e4042;box-shadow:none}
+html[data-bs-theme="dark"] .pro-top-title strong,html[data-bs-theme="dark"] .pro-account-button,html[data-bs-theme="dark"] .pro-account-dropdown-head strong {color:#e4e6eb}
+html[data-bs-theme="dark"] .pro-top-icon {color:#d6d8db!important}
+html[data-bs-theme="dark"] .pro-top-icon:hover,html[data-bs-theme="dark"] .pro-account-dropdown .dropdown-item:hover {background:#3a3b3c}
+html[data-bs-theme="dark"] .pro-top-divider {background:#3a3b3c}
+html[data-bs-theme="dark"] .pro-quick-add {background:#42392f;border-color:#66503d;color:#ffbe92!important}
+html[data-bs-theme="dark"] .pro-quick-add:hover {background:#594333}
+html[data-bs-theme="dark"] .pro-environment {background:#303134;color:#b0b3b8}
+html[data-bs-theme="dark"] .pro-avatar {background:#3a3b3c;border-color:#242526;box-shadow:0 0 0 1px #425571;color:#dceafe}
+html[data-bs-theme="dark"] .pro-account-dropdown {background:#242526;border-color:#3e4042;box-shadow:0 20px 42px rgba(0,0,0,.35)}
+html[data-bs-theme="dark"] .pro-account-dropdown-head small {color:#a6b6cc}
+html[data-bs-theme="dark"] .pro-public-link {color:#c3d4ed;background:#303134;border-color:#3e4042}
+html[data-bs-theme="dark"] .pro-public-link:hover {background:#3a3b3c}
+html[data-bs-theme="dark"] .pro-theme-select {background:#242526;color:#e4e6eb;border-color:#4e4f50}
+html[data-bs-theme="dark"] .payroll-app .card,
+html[data-bs-theme="dark"] .metric-card {background:#242526!important;border-color:#3e4042!important;box-shadow:0 10px 30px rgba(0,0,0,.10)!important}
+html[data-bs-theme="dark"] .payroll-app .card .card-body .card-title,
+html[data-bs-theme="dark"] .pro-card-heading h3,
+html[data-bs-theme="dark"] .pro-page-heading h1,
+html[data-bs-theme="dark"] .page-heading h1,
+html[data-bs-theme="dark"] .section-heading,
+html[data-bs-theme="dark"] .metric-card h2,
+html[data-bs-theme="dark"] .pro-period-label,
+html[data-bs-theme="dark"] .pro-amount-stack strong,
+html[data-bs-theme="dark"] .summary-line strong {color:#e4e6eb!important}
+html[data-bs-theme="dark"] .pro-page-heading p:not(.eyebrow),
+html[data-bs-theme="dark"] .page-heading p:not(.eyebrow),
+html[data-bs-theme="dark"] .pro-card-heading p,
+html[data-bs-theme="dark"] .pro-period-dates,
+html[data-bs-theme="dark"] .pro-period-note,
+html[data-bs-theme="dark"] .metric-card p,
+html[data-bs-theme="dark"] .pro-amount-stack>div,
+html[data-bs-theme="dark"] .summary-line,
+html[data-bs-theme="dark"] .pro-table-empty span {color:#afbdd1!important}
+html[data-bs-theme="dark"] .pro-amount-stack>div,
+html[data-bs-theme="dark"] .summary-line {border-color:#33445a}
+html[data-bs-theme="dark"] .pro-amount-stack>div.pro-amount-total {background:#303134;color:#e2eaf8}
+html[data-bs-theme="dark"] .pro-amount-total strong {color:#f4aa83!important}
+html[data-bs-theme="dark"] .payroll-app .table {--bs-table-bg:#242526;--bs-table-color:#e4e6eb;--bs-table-striped-bg:#303134;--bs-table-hover-bg:#3a3b3c;--bs-table-border-color:#3e4042;color:#e4e6eb}
+html[data-bs-theme="dark"] .payroll-app .table thead th {background:#303134;color:#bdcce1;border-color:#3e4042}
+html[data-bs-theme="dark"] .payroll-app .table tbody td {background:#242526;color:#dce5f3;border-color:#3e4042}
+html[data-bs-theme="dark"] .payroll-app .table tbody tr:hover td {background:#303134}
+html[data-bs-theme="dark"] .pro-table-money {color:#ecf2ff!important}
+html[data-bs-theme="dark"] .pro-person-avatar,
+html[data-bs-theme="dark"] .metric-icon,
+html[data-bs-theme="dark"] .pro-card-heading-icon,
+html[data-bs-theme="dark"] .pro-empty-icon,
+html[data-bs-theme="dark"] .pro-action-icon {background:#3a3b3c;color:#b8cfee}
+html[data-bs-theme="dark"] .pro-action-icon.green {background:#20483e;color:#85d6bb}
+html[data-bs-theme="dark"] .pro-action-icon.orange,
+html[data-bs-theme="dark"] .pro-card-heading-icon.orange {background:#4a362e;color:#ffb78e}
+html[data-bs-theme="dark"] .pro-action-list a {border-color:#3e4042;color:#e4e6eb;background:#242526}
+html[data-bs-theme="dark"] .pro-action-list a:hover {background:#3a3b3c;border-color:#626466}
+html[data-bs-theme="dark"] .pro-action-list small,
+html[data-bs-theme="dark"] .pro-action-disclaimer {color:#b0b3b8}
+html[data-bs-theme="dark"] .payroll-app .form-label {color:#d0ddf0}
+html[data-bs-theme="dark"] .payroll-app .form-control,
+html[data-bs-theme="dark"] .payroll-app .form-select {background-color:#242526!important;color:#e4e6eb!important;border-color:#4e4f50!important}
+html[data-bs-theme="dark"] .payroll-app .form-control::placeholder {color:#95a7c1}
+html[data-bs-theme="dark"] .payroll-app .form-control:focus,
+html[data-bs-theme="dark"] .payroll-app .form-select:focus {border-color:#e6a071!important;box-shadow:0 0 0 .19rem rgba(230,160,113,.17)}
+html[data-bs-theme="dark"] .payroll-app .form-control:disabled,
+html[data-bs-theme="dark"] .payroll-app .form-select:disabled {background:#303134!important;color:#9babbe!important}
+html[data-bs-theme="dark"] .payroll-app .btn-outline-primary {color:#c1d8ff;border-color:#6b8db7}
+html[data-bs-theme="dark"] .payroll-app .btn-outline-secondary {color:#d1dced;border-color:#52637c}
+html[data-bs-theme="dark"] .payroll-app .btn-outline-secondary:hover {background:#3a3b3c;color:#fff}
+html[data-bs-theme="dark"] .payroll-app .btn-light,
+html[data-bs-theme="dark"] .payroll-app .btn-light-primary {background:#3a3b3c!important;color:#dceaff!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .btn-primary {background:#bf653b!important;border-color:#bf653b!important;color:#fff!important}
+html[data-bs-theme="dark"] .payroll-app .btn-primary:hover {background:#d17a4d!important;border-color:#d17a4d!important}
+html[data-bs-theme="dark"] .payroll-app .pagination .page-link {background:#303134;border-color:#4e4f50;color:#dce9fa}
+html[data-bs-theme="dark"] .payroll-app .pagination .active .page-link {background:#39588b;border-color:#39588b;color:white}
+html[data-bs-theme="dark"] .pro-amount-stack,
+html[data-bs-theme="dark"] .payroll-app .border-bottom {border-color:#3e4042!important}
+html[data-bs-theme="dark"] .pro-period-note,
+html[data-bs-theme="dark"] .pro-table-empty strong,
+html[data-bs-theme="dark"] .pro-empty-chart h4,
+html[data-bs-theme="dark"] .pro-empty-small h4 {color:#d9e6f8}
+html[data-bs-theme="dark"] .pro-empty-chart {background:radial-gradient(circle,#25394e,#242526)}
+html[data-bs-theme="dark"] .pro-empty-chart p,html[data-bs-theme="dark"] .pro-empty-small p {color:#aabbd2}
+html[data-bs-theme="dark"] .pro-empty-graphic span {border-color:#4e4f50}
+html[data-bs-theme="dark"] .count-pill {background:#343536;color:#bfd6f8}
+html[data-bs-theme="dark"] .entry-edit-cell {background:#303134!important}
+html[data-bs-theme="dark"] .badge.status-active,html[data-bs-theme="dark"] .badge.status-present,html[data-bs-theme="dark"] .badge.status-finalized {background:#274339;color:#8bdfbc}
+html[data-bs-theme="dark"] .badge.status-inactive,html[data-bs-theme="dark"] .badge.status-absent {background:#43302e;color:#fac1bd}
+html[data-bs-theme="dark"] .badge.status-draft,html[data-bs-theme="dark"] .badge.status-leave {background:#43382f;color:#ffd0a6}
+html[data-bs-theme="dark"] .pro-footer {color:#b0b3b8}
+html[data-bs-theme="dark"] .payroll-app .dropdown-menu {background:#242526;border-color:#3e4042;color:#e4e6eb}
+html[data-bs-theme="dark"] .payroll-app .dropdown-item {color:#e4e6eb}
+html[data-bs-theme="dark"] .payroll-app .dropdown-item:hover {background:#3a3b3c;color:#fff}
+html[data-bs-theme="dark"] .payroll-app .alert {color:inherit}
+html[data-bs-theme="dark"] .payroll-app .card-subtitle,
+html[data-bs-theme="dark"] .payroll-app .text-muted {color:#b0b3b8!important}
+html[data-bs-theme="dark"] .payroll-app .bg-white {background:#242526!important}
+html[data-bs-theme="dark"] .payroll-app .bg-light {background:#303134!important}
+@media(max-width:767.98px){.payroll-app .pro-public-link{display:none}.payroll-app .pro-theme-select{min-width:78px;font-size:10px;padding-inline:6px}}
+@media(prefers-reduced-motion:reduce){.pro-public-link,.pro-theme-select{transition:none!important}}
+
+
+/* Meta-style neutral charcoal palette (deliberately NOT dark navy).
+   These overrides must follow V3 Flexy customizations to keep specificity. */
+html[data-bs-theme="dark"] {
+  color-scheme:dark;
+  --bs-body-bg:#18191a;--bs-body-color:#e4e6eb;
+  --bs-emphasis-color:#f0f2f5;--bs-secondary-color:#b0b3b8;
+  --bs-secondary-bg:#303134;--bs-tertiary-bg:#242526;
+  --bs-border-color:#3e4042;--bs-primary:#89b4ff;--bs-primary-rgb:137,180,255;
+  --bs-primary-bg-subtle:#303134;
+  --pro-bg:#18191a;--pro-white:#242526;--pro-surface:#242526;
+  --pro-text:#e4e6eb;--pro-ink:#e4e6eb;--pro-muted:#b0b3b8;
+  --pro-quiet:#303134;--pro-line:#3e4042;
+  --pro-navy:#89b4ff;--pro-deep:#242526;
+  --pro-orange:#e59a74;--pro-orange-deep:#cc825b;
+  --pro-shadow:0 8px 28px rgba(0,0,0,.12);
+}
+html[data-bs-theme="dark"] body.payroll-app,
+html[data-bs-theme="dark"] .payroll-app #main-wrapper,
+html[data-bs-theme="dark"] .payroll-app .page-wrapper,
+html[data-bs-theme="dark"] .payroll-app .body-wrapper {background:#18191a!important;color:#e4e6eb!important}
+html[data-bs-theme="dark"] .payroll-app .left-sidebar {
+  background:#242526!important;border-right:1px solid #3e4042!important;
+  box-shadow:none!important;
+}
+html[data-bs-theme="dark"] .payroll-app .left-sidebar .brand-logo,
+html[data-bs-theme="dark"] .payroll-app .pro-sidebar-status {border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .left-sidebar .nav-small-cap,
+html[data-bs-theme="dark"] .payroll-app .left-sidebar .nav-small-cap-icon {color:#b0b3b8!important}
+html[data-bs-theme="dark"] .payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link {color:#c9cbd0!important}
+html[data-bs-theme="dark"] .payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link:hover {background:#3a3b3c!important;color:#f0f2f5!important}
+html[data-bs-theme="dark"] .payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link.active {background:#3a3b3c!important;color:#f0f2f5!important;box-shadow:inset 3px 0 0 #89b4ff!important}
+html[data-bs-theme="dark"] .payroll-app .pro-sidebar-status {background:#303134;color:#e4e6eb}
+html[data-bs-theme="dark"] .payroll-app .pro-sidebar-status span,
+html[data-bs-theme="dark"] .payroll-app .brand-wordmark small {color:#b0b3b8}
+html[data-bs-theme="dark"] .payroll-app .pro-sidebar-status-icon {background:#3a3b3c}
+html[data-bs-theme="dark"] .payroll-app .topbar {background:#242526!important;border-bottom-color:#3e4042!important;box-shadow:none!important}
+html[data-bs-theme="dark"] .payroll-app .pro-welcome-card {background:linear-gradient(110deg,#303134 0%,#353638 100%)!important;border:1px solid #4e4f50}
+html[data-bs-theme="dark"] .payroll-app .pro-welcome-card::before {background:radial-gradient(circle at 78% 44%,rgba(229,154,116,.08),transparent 68%)!important}
+html[data-bs-theme="dark"] .payroll-app .pro-welcome-card h2 {color:#f0f2f5!important}
+html[data-bs-theme="dark"] .payroll-app .pro-welcome-kicker {color:#bfc3c8}
+html[data-bs-theme="dark"] .payroll-app .card,
+html[data-bs-theme="dark"] .payroll-app .metric-card,
+html[data-bs-theme="dark"] .payroll-app .pro-stat-card {background:#242526!important;border-color:#3e4042!important;color:#e4e6eb!important;box-shadow:0 6px 16px rgba(0,0,0,.08)!important}
+html[data-bs-theme="dark"] .payroll-app .pro-stat-card:hover,
+html[data-bs-theme="dark"] .payroll-app .pro-action-list a:hover {background:#303134!important;border-color:#555658!important}
+html[data-bs-theme="dark"] .payroll-app .table,
+html[data-bs-theme="dark"] .payroll-app .table>:not(caption)>*>* {
+  --bs-table-bg:#242526;--bs-table-color:#e4e6eb;--bs-table-hover-bg:#303134;
+  --bs-table-border-color:#3e4042;color:#e4e6eb;
+}
+html[data-bs-theme="dark"] .payroll-app .table thead th {background:#303134!important;color:#b0b3b8!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .table tbody td {background:#242526!important;color:#e4e6eb!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .table tbody tr:hover td {background:#303134!important}
+html[data-bs-theme="dark"] .payroll-app .form-control,
+html[data-bs-theme="dark"] .payroll-app .form-select,
+html[data-bs-theme="dark"] .payroll-app .pro-theme-select,
+html[data-bs-theme="dark"] .payroll-app .dropdown-menu {background-color:#242526!important;color:#e4e6eb!important;border-color:#4e4f50!important}
+html[data-bs-theme="dark"] .payroll-app .form-control::placeholder {color:#b0b3b8!important}
+html[data-bs-theme="dark"] .payroll-app .btn-light,
+html[data-bs-theme="dark"] .payroll-app .btn-light-primary,
+html[data-bs-theme="dark"] .payroll-app .bg-light,
+html[data-bs-theme="dark"] .payroll-app .bg-white {background:#303134!important;color:#e4e6eb!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .dropdown-item:hover,
+html[data-bs-theme="dark"] .payroll-app .pro-top-icon:hover {background:#3a3b3c!important}
+html[data-bs-theme="dark"] .payroll-app .pro-page-heading h1,
+html[data-bs-theme="dark"] .payroll-app .page-heading h1,
+html[data-bs-theme="dark"] .payroll-app .section-heading,
+html[data-bs-theme="dark"] .payroll-app .metric-card h2,
+html[data-bs-theme="dark"] .payroll-app .pro-stat-number,
+html[data-bs-theme="dark"] .payroll-app .pro-card-heading h3 {color:#e4e6eb!important}
+html[data-bs-theme="dark"] .payroll-app .pro-amount-stack>div.pro-amount-total,
+html[data-bs-theme="dark"] .payroll-app .entry-edit-cell {background:#303134!important}
+html[data-bs-theme="dark"] .payroll-app .pro-empty-chart {background:#242526!important}
+html[data-bs-theme="dark"] .payroll-app .pro-footer {border-color:#3e4042;color:#b0b3b8}
+html[data-bs-theme="dark"] .payroll-app .pro-account-dropdown {background:#242526!important}
+html[data-bs-theme="dark"] .payroll-app .pro-public-link,
+html[data-bs-theme="dark"] .payroll-app .pro-action-list a {background:#303134;color:#e4e6eb;border-color:#3e4042}
+html[data-bs-theme="dark"] .payroll-app .pro-account-button {color:#e4e6eb!important}
+@media(prefers-reduced-motion:reduce){.payroll-app .left-sidebar,.payroll-app .topbar,.payroll-app .page-wrapper{transition:none!important}}
+
+/* Final neutral dark surfaces. No navy canvas or sidebar in dark mode. */
+html[data-bs-theme="dark"] body.payroll-app,
+html[data-bs-theme="dark"] body.payroll-app .page-wrapper,
+html[data-bs-theme="dark"] body.payroll-app .body-wrapper {background:#18191A!important;}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar,
+html[data-bs-theme="dark"] body.payroll-app .topbar,
+html[data-bs-theme="dark"] body.payroll-app .card {background:#242526!important;}
+html[data-bs-theme="dark"] body.payroll-app .pro-welcome-card {
+  background:linear-gradient(110deg,#303134 0%,#353638 100%)!important;
+}
+html[data-bs-theme="dark"] body.payroll-app .sidebar-nav .sidebar-link.active {
+  background:#3A3B3C!important;color:#F0F2F5!important;
+}

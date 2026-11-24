@@ -1,0 +1,71 @@
+/*
+ * Payroll Pro V7 — UX QA guardrails
+ * Loaded after Flexy / landing / login / admin styles.
+ * No global user-select:none, no blur-on-click hacks, no form logic changes.
+ */
+:root { --pro-qa-focus: #f08a47; }
+
+/* Prevent accidental text-insertion caret on regular UI copy (including
+   when a browser has Caret Browsing active). Text remains selectable. */
+body.pro-landing,
+body.pro-login-body,
+body.payroll-app {
+  caret-color: transparent;
+  cursor: default;
+}
+
+/* Keep genuine editing controls working normally, including after fast nav. */
+body.pro-landing :is(input, textarea, [contenteditable="true"], [contenteditable=""], [role="textbox"]),
+body.pro-login-body :is(input, textarea, [contenteditable="true"], [contenteditable=""], [role="textbox"]),
+body.payroll-app :is(input, textarea, [contenteditable="true"], [contenteditable=""], [role="textbox"]) {
+  caret-color: auto;
+  cursor: text;
+}
+body.pro-landing input:is([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="range"], [type="color"]),
+body.pro-login-body input:is([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="range"], [type="color"]),
+body.payroll-app input:is([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="range"], [type="color"]) {
+  cursor: pointer;
+}
+
+/* Correct pointer affordances. Real, reachable controls still receive focus. */
+body.pro-landing :is(a[href], button, select, summary, [role="button"]),
+body.pro-login-body :is(a[href], button, select, summary, [role="button"]),
+body.payroll-app :is(a[href], button, select, summary, [role="button"]) {
+  cursor: pointer;
+}
+body.pro-landing :is(button, input, select, textarea):disabled,
+body.pro-login-body :is(button, input, select, textarea):disabled,
+body.payroll-app :is(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+
+/* Visible keyboard focus without adding a persistent mouse-click ring. */
+body.pro-landing :is(a[href], button, select, input, textarea, summary, [tabindex]):focus-visible,
+body.pro-login-body :is(a[href], button, select, input, textarea, summary, [tabindex]):focus-visible,
+body.payroll-app :is(a[href], button, select, input, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--pro-qa-focus) !important;
+  outline-offset: 3px;
+}
+
+/* Fast-nav programmatically focuses #main-content; don't show the outline for mouse transitions,
+   but preserve a useful focus indicator when keyboard users navigate there. */
+body.payroll-app #main-content:focus:not(:focus-visible) { outline: none; }
+body.payroll-app #main-content:focus-visible { outline: 2px solid var(--pro-qa-focus) !important; outline-offset: -3px; }
+
+/* Prevent overflowing tables and media from stretching narrow page layouts.
+   The table itself remains horizontally scrollable inside Bootstrap's wrapper. */
+body.payroll-app :is(.table-responsive, .pro-table-wrap),
+body.pro-landing :is(.pl-demo-main, .pl-container) { min-width: 0; }
+body.payroll-app img, body.pro-landing img, body.pro-login-body img { max-width: 100%; }
+
+/* No hidden motion on reduced-motion systems. */
+@media (prefers-reduced-motion: reduce) {
+  body.pro-landing *, body.pro-landing *::before, body.pro-landing *::after,
+  body.pro-login-body *, body.pro-login-body *::before, body.pro-login-body *::after,
+  body.payroll-app *, body.payroll-app *::before, body.payroll-app *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

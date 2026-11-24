@@ -1,0 +1,525 @@
+/*
+ * PAYROLL PRO / Flexy-first UI polish v3
+ * Palette from user-provided visual reference: navy, orange, white.
+ * This stylesheet is intentionally scoped and layered AFTER original Flexy CSS.
+ * It preserves Flexy's sidebar/page wrappers, JS sidebar toggles, and typography.
+ */
+:root,[data-bs-theme="light"][data-color-theme="Blue_Theme"]:root {
+    --bs-primary:#092D73;
+    --bs-primary-rgb:9,45,115;
+    --bs-primary-bg-subtle:#eaf1fc;
+    --bs-border-color:#e5ecf5;
+    --pro-navy:var(--payroll-brand);
+    --pro-deep:#08285F;
+    --pro-orange:var(--payroll-orange);
+    --pro-orange-deep:#bd5827;
+    --pro-ink:#1a2f52;
+    --pro-muted:#70809b;
+    --pro-line:#e9eef6;
+    --pro-bg:#f5f7fc;
+    --pro-white:#fff;
+    --pro-shadow:0 8px 28px rgba(14,43,94,.045);
+}
+html {scroll-behavior:smooth}
+body.payroll-app {background:var(--pro-bg)!important;color:var(--pro-ink)}
+.payroll-app #main-wrapper {min-height:100vh}
+.payroll-app .page-wrapper {background:var(--pro-bg);min-height:100vh}
+/* Flexy reserves 70px for the fixed topbar. No extra spacer or empty container. */
+.payroll-app .body-wrapper {padding-top:88px!important}
+.payroll-app .body-wrapper>.container-fluid {max-width:1520px;margin-inline:auto;padding:0 clamp(16px,2.15vw,34px) 24px}
+.payroll-app .body-wrapper>.container-fluid.pro-page {min-height:unset!important}
+.payroll-app .pro-page {animation:pro-fade-in .16s ease-out both}
+@keyframes pro-fade-in {from{opacity:.6;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* Sidebar: reuse native Flexy sidebar structure so mobile/mini navigation keeps working. */
+.payroll-app .left-sidebar {background:linear-gradient(180deg,#08285F 0%,#092D73 74%,#16458A 100%)!important;box-shadow:4px 0 24px rgba(7,25,61,.08);border-right:1px solid rgba(255,255,255,.07)}
+.payroll-app .left-sidebar .brand-logo {min-height:82px;padding:16px 19px;border-bottom:1px solid rgba(255,255,255,.105)}
+.payroll-app .pro-sidebar-inner {height:100%;display:flex;flex-direction:column}
+.payroll-app .left-sidebar .scroll-sidebar {flex:1;min-height:0}
+.brand-lockup {color:#fff!important;min-width:0}
+.brand-emblem {display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;color:#fff;background:linear-gradient(145deg,#ff8c4a,var(--pro-orange));font-size:23px;box-shadow:0 10px 18px rgba(245,102,24,.16)}
+.brand-wordmark {color:#fff;font-size:19px;font-weight:800;letter-spacing:-.4px;line-height:1;white-space:nowrap}
+.brand-wordmark>span {color:#de743d}
+.brand-wordmark small {display:block;margin-top:5px;color:#b6c6e4;text-transform:uppercase;font-size:9px;font-weight:750;letter-spacing:1.2px}
+.payroll-app .left-sidebar .sidebartoggler {color:#dbe8ff}
+.payroll-app .left-sidebar .nav-small-cap {color:#8aa5d1!important;font-weight:800;font-size:10px;letter-spacing:1.25px;padding-top:22px;padding-bottom:7px}
+.payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link {color:#d2dcf0!important;border-radius:11px!important;margin:3px 12px;padding:11px 14px;gap:12px;transition:color .16s ease,background-color .16s ease,box-shadow .16s ease}
+.payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link span:first-child {display:inline-flex;align-items:center;justify-content:center}
+.payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link i {font-size:20px;color:inherit}
+.payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link:hover {background:rgba(255,255,255,.115)!important;color:#fff!important}
+.payroll-app .left-sidebar .sidebar-nav ul .sidebar-item .sidebar-link.active {color:#fff!important;background:var(--pro-orange)!important;box-shadow:0 8px 20px rgba(222,116,61,.18)}
+.payroll-app .left-sidebar .nav-small-cap-icon {color:#8aa5d1}
+.pro-sidebar-status {margin:14px 17px 17px;padding:13px 12px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);border-radius:13px;color:#ecf3ff}
+.pro-sidebar-status-icon {width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,.09);color:#ffad79;font-size:20px}
+.pro-sidebar-status strong,.pro-sidebar-status span {display:block}
+.pro-sidebar-status strong {font-size:11px;line-height:1.2}
+.pro-sidebar-status span {font-size:10px;color:#9fb4da;margin-top:3px}
+
+/* Fixed topbar from Flexy; no custom offsets affecting the content flow. */
+.payroll-app .topbar {background:#fff!important;border-bottom:1px solid #e9eef5;box-shadow:0 3px 16px rgba(16,43,88,.025)}
+.payroll-app .topbar .navbar {min-height:70px}
+.pro-top-icon {width:40px;height:40px;display:grid;place-items:center;color:#3d537a!important;border-radius:11px;font-size:23px;transition:background .15s ease}
+.pro-top-icon:hover {background:#f0f4fa}
+.pro-top-divider {width:1px;height:28px;background:#e8edf4;margin-inline:4px}
+.pro-top-overline {display:block;color:#ef6619;font-size:9px;font-weight:900;letter-spacing:1.45px;line-height:1.25}
+.pro-top-title strong {display:block;margin-top:3px;color:#092D73;font-size:16px;letter-spacing:-.3px;line-height:1.2}
+.pro-quick-add {border-radius:10px;background:#fff2e8;color:#c9530d!important;border:1px solid #ffe1ce;font-size:12px;font-weight:800;padding:9px 12px}
+.pro-quick-add:hover {background:#ffe5d3}
+.pro-environment {display:inline-flex;align-items:center;gap:7px;border-radius:999px;background:#f0f5fa;color:#6b7b93;padding:7px 10px;font-size:11px;font-weight:750}
+.pro-env-dot,.pro-live-dot {width:7px;height:7px;display:inline-block;border-radius:50%;background:#25a06a;box-shadow:0 0 0 3px rgba(37,160,106,.13)}
+.pro-account-button {display:flex;align-items:center;gap:8px;border:0;background:transparent;color:#092D73;padding:4px 3px;max-width:210px;cursor:pointer;font-size:12px;font-weight:800}
+.pro-account-name {max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pro-avatar {width:35px;height:35px;display:grid;place-items:center;flex:0 0 35px;border-radius:50%;background:#eaf0fa;color:#0d377c;font-size:13px;font-weight:850;border:2px solid #fff;box-shadow:0 0 0 1px #e2eafa}
+.pro-account-dropdown {min-width:230px;border-radius:13px;padding:8px;box-shadow:0 16px 38px rgba(15,46,91,.12);border:1px solid var(--pro-line)}
+.pro-account-dropdown-head {padding:10px 11px 8px;min-width:0}
+.pro-account-dropdown-head strong {display:block;font-size:13px;color:var(--pro-ink)}
+.pro-account-dropdown-head small {display:block;color:var(--pro-muted);font-size:11px;overflow-wrap:anywhere}
+.pro-account-dropdown .dropdown-item {border-radius:7px;padding:9px 11px;font-size:12px;font-weight:700}
+.pro-account-dropdown .dropdown-item:hover {background:#f5f8fc}
+
+/* Alerts must never become blank .container-fluid page-height sections. */
+.pro-alerts {max-width:1520px;margin:0 auto 15px;padding:0 clamp(16px,2.15vw,34px)}
+.pro-alerts .alert {border-radius:12px;box-shadow:0 5px 18px rgba(15,47,86,.04)}
+
+/* Primary page layout */
+.eyebrow,.pro-overline {font-size:10px;letter-spacing:1.45px;font-weight:900;color:var(--pro-orange);text-transform:uppercase;margin:0 0 6px}
+.pro-page-heading,.page-heading {display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:22px}
+.pro-page-heading h1,.page-heading h1 {color:#132e5c;font-size:clamp(25px,2.2vw,32px);line-height:1.2;font-weight:800;letter-spacing:-1.1px;margin:0}
+.pro-page-heading p:not(.eyebrow),.page-heading p:not(.eyebrow) {color:#74839c;font-size:13px;margin:7px 0 0;line-height:1.5}
+.pro-heading-actions {display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.payroll-app .btn {border-radius:9px;font-weight:750;transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+.payroll-app .btn-primary,.payroll-login .btn-primary {background-color:var(--pro-orange)!important;border-color:var(--pro-orange)!important;color:#fff!important}
+.payroll-app .btn-primary:hover,.payroll-login .btn-primary:hover {background:#c45f2c!important;border-color:#c45f2c!important;box-shadow:0 5px 14px rgba(245,102,24,.16)}
+.payroll-app .btn-outline-primary {color:#092D73;border-color:#b8c7df}
+.payroll-app .btn-outline-primary:hover {color:#fff;background:#092D73;border-color:#092D73}
+.payroll-app .btn-outline-secondary {color:#667793;border-color:#d6dfeb}
+.payroll-app .btn-outline-secondary:hover {color:#203c67;background:#f2f6fb;border-color:#aebed5}
+.payroll-app .btn-outline-danger:hover {color:white}
+.payroll-app .card {border:1px solid #e9eef6!important;border-radius:16px!important;box-shadow:var(--pro-shadow)!important;background:#fff}
+.payroll-app .card .card-body {padding:24px}
+.payroll-app .card .card-body .card-title {color:#18345e}
+.pro-surface-card {overflow:hidden}
+.pro-card-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:19px}
+.pro-card-heading h3 {color:#193459;font-size:18px;font-weight:800;letter-spacing:-.45px;margin:0 0 5px}
+.pro-card-heading p {color:#8592a6;font-size:12px;margin:0}
+.pro-card-heading-icon {height:39px;width:39px;border-radius:12px;display:grid;place-items:center;flex:none;background:#edf3fd;color:#092D73;font-size:22px}
+.pro-card-heading-icon.orange {background:#fff0e5;color:#e86a21}
+
+/* Compact banner inspired by Flexy's original welcome card. */
+.pro-welcome-card {display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;min-height:168px;padding:26px 35px;margin-bottom:18px;background:linear-gradient(107deg,#08285F 0%,#092D73 70%,#16458A 100%);color:#fff;border-radius:18px;isolation:isolate}
+.pro-welcome-card:before {position:absolute;content:"";inset:0 0 0 auto;width:40%;background:radial-gradient(circle at 78% 44%,rgba(248,123,54,.28),transparent 69%);z-index:-1}
+.pro-welcome-copy {position:relative;max-width:680px;z-index:1}
+.pro-welcome-kicker {display:flex;align-items:center;gap:10px;color:#bbceec;font-size:10px;font-weight:850;letter-spacing:1.45px}
+.pro-welcome-card h2 {font-weight:850;letter-spacing:-1.15px;font-size:clamp(25px,2.45vw,34px);line-height:1.18;margin:9px 0 8px;color:white}
+.pro-welcome-card h2 span {color:#ff8a47}
+.pro-welcome-card p {font-size:12.5px;max-width:500px;line-height:1.6;margin:0;color:#dae7fb}
+.pro-welcome-link {display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-weight:800;font-size:12px;color:white;text-decoration:none}
+.pro-welcome-link:hover {color:#ffbb94}
+.pro-welcome-art {position:absolute;right:4%;top:0;height:100%;width:260px;display:grid;place-items:center}
+.pro-art-main {display:grid;place-items:center;height:94px;width:94px;border-radius:25px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(3px);color:white;font-size:51px;transform:rotate(-8deg)}
+.pro-art-ring {position:absolute;border:1px solid rgba(255,255,255,.10);border-radius:50%;width:190px;height:190px}
+.pro-art-ring.ring-two {width:260px;height:260px;border-color:rgba(255,255,255,.06)}
+.pro-art-accent {position:absolute;right:21px;top:19px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;color:#fff;background:#de743d;font-size:24px;transform:rotate(10deg);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+
+/* Four live metric cards */
+.pro-metrics {margin-bottom:2px}
+.pro-stat-card {display:block;color:inherit;text-decoration:none;transition:transform .16s ease,box-shadow .16s ease!important}
+.pro-stat-card:hover {transform:translateY(-3px);box-shadow:0 13px 30px rgba(15,54,112,.10)!important}
+.pro-stat-card .card-body {padding:21px 22px!important}
+.pro-stat-top {display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pro-stat-icon {display:grid;place-items:center;width:42px;height:42px;border-radius:13px;font-size:22px}
+.pro-stat-icon.blue {color:#2052a4;background:#eaf1fc}
+.pro-stat-icon.orange {color:#de621b;background:#fff1e5}
+.pro-stat-icon.green {color:#169a72;background:#e9f8f1}
+.pro-stat-icon.purple {color:#7562b1;background:#f0ecfc}
+.pro-stat-arrow {color:#b6c2d2;font-size:19px}
+.pro-stat-label {display:block;color:#7c89a0;font-size:12px;font-weight:750;margin-bottom:3px}
+.pro-stat-number {display:block;color:#183a72;font-size:31px;font-weight:850;letter-spacing:-1.1px;line-height:1.25;margin-bottom:8px}
+.pro-stat-foot {display:flex;align-items:center;gap:5px;color:#d75f16;font-size:11.5px;font-weight:750}
+.pro-metrics+.row {margin-top:4px}
+
+/* Payroll details, table and empty states */
+.pro-period-label {font-size:15px;color:#092D73;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pro-period-dates {display:flex;align-items:center;gap:8px;font-size:12px;color:#7b8ba3;margin-top:10px}
+.pro-amount-stack>div {display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--pro-line);padding:12px 0;color:#72829c;font-size:12px}
+.pro-amount-stack strong {font-size:13px;color:#092D73}
+.pro-amount-stack>div.pro-amount-total {background:#f2f6fd;border-radius:10px;border:0;margin:14px 0 0;padding:15px;color:#092D73;font-weight:750}
+.pro-amount-total strong {font-size:19px;color:#f06516}
+.pro-period-note {font-size:11px;color:#8190a6;margin-bottom:0;line-height:1.4}
+.pro-table {min-width:480px}
+.payroll-app .table thead th {background:#f7f9fd;color:#7888a1;font-size:10.5px;text-transform:uppercase;letter-spacing:.75px;font-weight:850;border-bottom:1px solid #e9eff5;padding:13px 13px;white-space:nowrap}
+.payroll-app .table tbody td {padding:13px;color:#32435e;border-bottom-color:#f0f3f8;font-size:12.5px;vertical-align:middle}
+.payroll-app .table tbody tr:hover {background:#f9fbff}
+.payroll-app .table tbody tr:last-child td {border-bottom:0}
+.payroll-app .table td small {font-size:11px}
+.pro-table-money {font-weight:800;color:#092D73!important;white-space:nowrap}
+.pro-person-cell {display:flex;align-items:center;gap:10px;min-width:145px}
+.pro-person-cell strong {font-weight:750;font-size:12px}
+.pro-person-avatar {width:31px;height:31px;border-radius:11px;display:grid;place-items:center;flex:none;color:#1a4e99;background:#eaf1fb;font-size:12px;font-weight:850}
+.pro-table-empty {display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;padding:22px 0 18px;text-align:center}
+.pro-table-empty i {font-size:30px;color:#b1bfd4}.pro-table-empty strong {font-size:13px;color:#526785}.pro-table-empty span {font-size:11px;color:#94a0b3}
+.pro-empty-chart {height:280px;padding:24px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(ellipse at 50% 60%,#f7f9fd 0%,white 70%);border-radius:12px}
+.pro-empty-graphic {position:relative;color:#b0c0d9;font-size:48px;line-height:1}
+.pro-empty-graphic span {position:absolute;inset:-13px;border:1px dashed #dee7f3;border-radius:50%}
+.pro-empty-chart h4,.pro-empty-small h4 {font-size:15px;font-weight:800;color:#344d73;margin:13px 0 5px}
+.pro-empty-chart p,.pro-empty-small p {max-width:400px;color:#8291a9;font-size:12px;line-height:1.55;margin:0 0 13px}
+.pro-empty-small {min-height:190px;display:flex;justify-content:center;align-items:center;flex-direction:column;text-align:center}
+.pro-empty-icon {width:54px;height:54px;display:grid;place-items:center;border-radius:18px;color:#6a88bb;background:#f0f5fc;font-size:27px}
+.pro-chart-fallback {padding:90px 15px;text-align:center;font-size:12px;color:#8291a9}
+.pro-action-list a {display:flex;align-items:center;gap:12px;border:1px solid #edf1f7;border-radius:11px;padding:12px;margin-bottom:9px;color:#234169;text-decoration:none;transition:background-color .15s ease,border-color .15s ease}
+.pro-action-list a:hover {background:#f8faff;border-color:#cfdeed}
+.pro-action-icon {flex:0 0 35px;width:35px;height:35px;display:grid;place-items:center;border-radius:11px;font-size:20px;color:#2757a2;background:#eaf1fc}
+.pro-action-icon.green {color:#1a9b73;background:#e5f8f0}.pro-action-icon.orange {color:#ed702b;background:#fff1e8}
+.pro-action-list a>span:nth-child(2) {flex:1;min-width:0}
+.pro-action-list strong,.pro-action-list small {display:block;line-height:1.3}
+.pro-action-list strong {font-size:12px;font-weight:800}.pro-action-list small {color:#8b97ab;font-size:11px;margin-top:4px}
+.pro-action-list a>i {color:#98a8bc}
+.pro-action-disclaimer {display:flex;align-items:start;gap:7px;color:#8491a6;font-size:10.5px;line-height:1.5;margin:15px 0 0}
+.pro-action-disclaimer i {font-size:16px;flex:none;color:#f08148}
+
+/* Legacy module view classes remain supported: no backend or form rewrites needed. */
+.section-heading {font-size:17px;font-weight:850;letter-spacing:-.25px;color:#092D73;margin-bottom:17px}
+.metric-card {height:100%;padding:20px 22px;border:1px solid #e9eef6;background:#fff;border-radius:16px;box-shadow:var(--pro-shadow)}
+.metric-card p {color:#7c8aa0;font-size:12px;font-weight:750;margin:10px 0 4px}
+.metric-card h2 {color:#092D73;font-size:29px;font-weight:850;margin:0 0 5px}
+.metric-card a {color:#e26719;font-size:12px;font-weight:800}
+.metric-card.compact {min-height:112px}.metric-card.compact p {margin:0 0 10px}.metric-card.compact h2 {font-size:23px}
+.metric-icon {width:38px;height:38px;border-radius:11px;background:#eaf1fd;color:#2b56a0;display:grid;place-items:center;font-size:22px}
+.summary-line {display:flex;justify-content:space-between;gap:14px;color:#7b8a9f;border-bottom:1px solid #eef2f8;padding:12px 0}
+.summary-line strong {color:#274168}.summary-line.important strong {color:#e56821;font-size:18px}
+.text-link {color:#e46b1d;font-size:12px;font-weight:800}
+.count-pill {display:inline-grid;place-items:center;background:#eff3fa;color:#2c517d;padding:0 8px;min-width:28px;height:26px;border-radius:99px;font-size:11px;font-weight:750}
+.payroll-app .badge {font-size:10px;letter-spacing:.15px;border-radius:999px;padding:6px 10px;font-weight:800}
+.badge.status-active,.badge.status-present,.badge.status-finalized {color:#13794e;background:#e5f7ed}
+.badge.status-inactive,.badge.status-absent {background:#fce9e7;color:#af3c2d}
+.badge.status-draft,.badge.status-leave {background:#fff0e2;color:#a85d19}
+.entry-edit-cell {background:#f8faff!important}
+.payroll-app .form-label {color:#415573;font-size:12px;font-weight:750;margin-bottom:7px}
+.payroll-app .form-control,.payroll-app .form-select {border-color:#dee6f0;border-radius:9px;min-height:41px;font-size:13px;background-color:#fff}
+.payroll-app textarea.form-control {min-height:92px}
+.payroll-app .form-control:focus,.payroll-app .form-select:focus,.payroll-login .form-control:focus {border-color:#ef864d;box-shadow:0 0 0 .22rem rgba(245,102,24,.13)}
+.payroll-app .form-control::placeholder {color:#a2aebe}
+.payroll-app .table .form-control-sm {min-height:34px}
+.payroll-app .alert {border-radius:11px;font-size:12px}
+.payroll-app .pagination {gap:4px;flex-wrap:wrap}
+.payroll-app .pagination .page-link {border-radius:8px!important;border:1px solid #e2e9f3;color:#315585;font-size:12px}
+.payroll-app .pagination .active .page-link {background:#092D73;color:white;border-color:#092D73}
+.payroll-app .table-responsive {border-radius:10px}
+.pro-footer {max-width:1520px;margin:10px auto 0;padding:16px clamp(16px,2.15vw,34px) 23px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;color:#96a2b5;font-size:11px}
+.pro-footer-dot {margin:0 3px;color:#f38040}
+
+/* Login surface */
+.payroll-login {min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(127deg,#071b48 0%,#0b347b 68%,#1b4a88 100%);position:relative}
+.payroll-login:before {content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 80% 15%,rgba(246,111,34,.21),transparent 36%),radial-gradient(ellipse at 14% 80%,rgba(86,135,232,.15),transparent 36%)}
+.login-panel {position:relative;z-index:1;width:min(100%,450px);padding:34px;background:#fff;border-radius:22px;box-shadow:0 27px 80px rgba(0,0,0,.23)}
+.login-panel h1 {font-size:29px;font-weight:850;line-height:1.2;letter-spacing:-.9px;color:#092D73;margin-bottom:10px}
+.login-panel h1 span {color:var(--pro-orange)}
+.login-mark {height:55px;width:55px;border-radius:16px;display:grid;place-items:center;background:var(--pro-orange);color:white;font-size:29px;margin-bottom:20px}
+.login-panel .form-label {color:#445674;font-size:12px;font-weight:750}
+.login-panel .form-control {height:45px;border-radius:10px;font-size:13px}
+.login-panel .btn {border-radius:10px;font-size:13px;font-weight:800}
+.login-panel .eyebrow {margin-bottom:8px}
+.login-panel .login-footnote {font-size:11px;line-height:1.5;color:#8b98ac}
+
+/* Motion and responsive behavior: preserve sidebar logic from Flexy JS. */
+.payroll-app .page-wrapper,.payroll-app .topbar,.payroll-app .left-sidebar {transition:margin-left .20s ease,width .20s ease,transform .20s ease,background-color .20s ease}
+.payroll-app a:focus-visible,.payroll-app button:focus-visible,.payroll-login button:focus-visible {outline:3px solid rgba(245,102,24,.55);outline-offset:3px}
+@media(max-width:1299.98px){.pro-sidebar-status {display:none}.payroll-app .pro-page {animation:none}}
+@media(max-width:991.98px){.pro-welcome-art {opacity:.45;right:-72px}.pro-welcome-copy {max-width:560px}.payroll-app .topbar {padding-inline:14px}.payroll-app .body-wrapper {padding-top:84px!important}}
+@media(max-width:767.98px){.pro-page-heading,.page-heading {align-items:start}.pro-page-heading h1,.page-heading h1 {font-size:25px}.pro-heading-actions {width:100%}.pro-heading-actions .btn {flex:1}.pro-welcome-card {padding:24px 23px;min-height:170px}.pro-welcome-card p {max-width:85%}.pro-welcome-art {opacity:.23;right:-115px}.payroll-app .card .card-body {padding:19px}.pro-top-title strong {font-size:14px}.pro-footer {justify-content:center;text-align:center}.login-panel {padding:28px 24px}}
+@media(max-width:420px){.pro-welcome-card h2 {font-size:25px}.pro-welcome-card p {max-width:100%}.pro-welcome-art {display:none}.pro-top-overline {font-size:8px}.pro-top-title strong {font-size:13px}.payroll-app .topbar .navbar {min-height:64px}.payroll-app .body-wrapper {padding-top:80px!important}.pro-stat-number {font-size:29px}}
+@media(prefers-reduced-motion:reduce){html {scroll-behavior:auto}.payroll-app .pro-page,.payroll-app .page-wrapper,.payroll-app .topbar,.payroll-app .left-sidebar,.payroll-app .btn,.payroll-app .sidebar-link,.pro-stat-card {animation:none!important;transition:none!important}}
+
+/* Consolidated shared appearance controls (previously theme-system.css). */
+/* Layered after the original Flexy CSS and Payroll Pro UI V3.
+   Subdued shared controls and comprehensive dark palette for admin modules. */
+.pro-theme-select {font:inherit;min-height:36px;padding:8px 26px 8px 11px;border-radius:9px;border:1px solid var(--pro-line,#e3e9f2);color:var(--pro-text,#213b62);background:var(--pro-surface,#fff);font-size:11px;font-weight:750;cursor:pointer}
+.pro-public-link {display:inline-flex;align-items:center;gap:6px;padding:10px 12px;color:#546b88;border:1px solid #e1e9f2;border-radius:9px;font-size:11px;font-weight:800;transition:background-color .18s ease,color .18s ease}
+.pro-public-link:hover {color:#092D73;background:#f2f5fa}
+.payroll-app .pro-footer a {color:inherit;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .2s ease}
+.payroll-app .pro-footer a:hover {text-decoration-color:currentColor}
+.payroll-app .pro-theme-select {min-width:90px}
+.payroll-app .topbar .navbar {gap:12px}
+.payroll-app :focus-visible, .payroll-login :focus-visible {outline:3px solid #de8e57;outline-offset:3px}
+
+/* Unified admin tokens and neutral dark appearance. Removes dark-blue canvases. */
+html[data-bs-theme="light"] { --bs-primary:#092D73; --bs-primary-rgb:9,45,115; --pro-navy:var(--payroll-brand); --pro-deep:#08285F; --pro-bg:#f7f9fc; --pro-white:#fff; --pro-orange:var(--payroll-orange); }
+html[data-bs-theme="light"] body.payroll-app .left-sidebar {background:linear-gradient(180deg,#08285F 0%,#092D73 74%,#16458A 100%)!important}
+html[data-bs-theme="light"] body.payroll-app .pro-welcome-card {background:linear-gradient(110deg,#08285F 0%,#092D73 72%,#16458A 100%)!important}
+html[data-bs-theme="light"] .payroll-app .pro-top-title strong {color:#092D73}
+html[data-bs-theme="light"] .payroll-app .pagination .active .page-link {background:#092D73;border-color:#092D73}
+html[data-bs-theme="dark"] {
+  color-scheme:dark;
+  --bs-primary:#aac7ee;--bs-primary-rgb:170,199,238;
+  --bs-body-color:#e4e6eb;--bs-body-bg:#18191a;
+  --bs-border-color:#3e4042;--bs-secondary-bg:#303134;--bs-tertiary-bg:#303134;
+  --bs-primary-bg-subtle:#303134;
+  --pro-navy:#aac7ee;--pro-deep:#303134;
+  --pro-orange:#e59b72;--pro-orange-deep:#d78658;
+  --pro-ink:#e4e6eb;--pro-muted:#b0b3b8;--pro-line:#3e4042;
+  --pro-bg:#18191a;--pro-white:#242526;
+  --pro-surface:#242526;--pro-text:#e4e6eb;--pro-quiet:#303134;
+  --pro-shadow:0 11px 32px rgba(0,0,0,.18);
+}
+html[data-bs-theme="dark"] body.payroll-app,
+html[data-bs-theme="dark"] body.payroll-app .page-wrapper,
+html[data-bs-theme="dark"] body.payroll-app .body-wrapper {background:#18191a!important;color:#e4e6eb!important}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar,
+html[data-bs-theme="dark"] body.payroll-app .topbar,
+html[data-bs-theme="dark"] body.payroll-app .card,
+html[data-bs-theme="dark"] body.payroll-app .metric-card,
+html[data-bs-theme="dark"] body.payroll-app .pro-surface-card,
+html[data-bs-theme="dark"] body.payroll-app .pro-account-dropdown {background:#242526!important;border-color:#3e4042!important;color:#e4e6eb!important;box-shadow:0 8px 24px rgba(0,0,0,.10)}
+html[data-bs-theme="dark"] body.payroll-app .pro-welcome-card {background:linear-gradient(110deg,#303134,#38393b)!important;border:1px solid #4e4f50!important}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar {border-right:1px solid #3e4042!important}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar .brand-logo {border-bottom:1px solid #3e4042}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar .sidebar-nav .sidebar-link {color:#c7c9cc!important}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar .sidebar-nav .sidebar-link:hover,
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar .sidebar-nav .sidebar-link.active {background:#3a3b3c!important;color:#f0f2f5!important;box-shadow:none}
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar .nav-small-cap,
+html[data-bs-theme="dark"] body.payroll-app .left-sidebar .nav-small-cap-icon {color:#a4a7ac!important}
+html[data-bs-theme="dark"] body.payroll-app .brand-wordmark small,
+html[data-bs-theme="dark"] body.payroll-app .pro-sidebar-status span {color:#b0b3b8}
+html[data-bs-theme="dark"] body.payroll-app .pro-sidebar-status {border-color:#4e4f50;background:#303134;color:#e4e6eb}
+html[data-bs-theme="dark"] body.payroll-app .pro-sidebar-status-icon {background:#3a3b3c;color:#f1aa81}
+html[data-bs-theme="dark"] body.payroll-app .topbar {border-bottom:1px solid #3e4042!important;box-shadow:none}
+html[data-bs-theme="dark"] .payroll-app .pro-top-icon,
+html[data-bs-theme="dark"] .payroll-app .pro-top-title strong,
+html[data-bs-theme="dark"] .payroll-app .pro-account-button,
+html[data-bs-theme="dark"] .payroll-app .pro-account-dropdown-head strong {color:#e4e6eb!important}
+html[data-bs-theme="dark"] .payroll-app .pro-top-divider {background:#3e4042}
+html[data-bs-theme="dark"] .payroll-app .pro-avatar,
+html[data-bs-theme="dark"] .payroll-app .pro-environment,
+html[data-bs-theme="dark"] .payroll-app .pro-quick-add {background:#303134;color:#e4e6eb!important;border-color:#4e4f50}
+html[data-bs-theme="dark"] .payroll-app .pro-theme-select,
+html[data-bs-theme="dark"] .payroll-app .form-control,
+html[data-bs-theme="dark"] .payroll-app .form-select,
+html[data-bs-theme="dark"] .payroll-app .dropdown-menu {background:#303134!important;color:#e4e6eb!important;border-color:#4e4f50!important}
+html[data-bs-theme="dark"] .payroll-app .form-control::placeholder {color:#b0b3b8!important}
+html[data-bs-theme="dark"] .payroll-app .form-control:focus,
+html[data-bs-theme="dark"] .payroll-app .form-select:focus {border-color:#88a7d0!important;box-shadow:0 0 0 .19rem rgba(136,167,208,.15)!important}
+html[data-bs-theme="dark"] .payroll-app .form-label,
+html[data-bs-theme="dark"] .payroll-app h1,
+html[data-bs-theme="dark"] .payroll-app h2,
+html[data-bs-theme="dark"] .payroll-app h3,
+html[data-bs-theme="dark"] .payroll-app h4,
+html[data-bs-theme="dark"] .payroll-app h5,
+html[data-bs-theme="dark"] .payroll-app .pro-stat-number,
+html[data-bs-theme="dark"] .payroll-app .pro-period-label,
+html[data-bs-theme="dark"] .payroll-app .summary-line strong,
+html[data-bs-theme="dark"] .payroll-app .pro-amount-stack strong {color:#e4e6eb!important}
+html[data-bs-theme="dark"] .payroll-app .text-muted,
+html[data-bs-theme="dark"] .payroll-app .card-subtitle,
+html[data-bs-theme="dark"] .payroll-app .pro-card-heading p,
+html[data-bs-theme="dark"] .payroll-app .pro-period-dates,
+html[data-bs-theme="dark"] .payroll-app .pro-period-note {color:#b0b3b8!important}
+html[data-bs-theme="dark"] .payroll-app .table,
+html[data-bs-theme="dark"] .payroll-app .table>:not(caption)>*>* {--bs-table-bg:#242526;--bs-table-color:#e4e6eb;--bs-table-hover-bg:#303134;--bs-table-border-color:#3e4042;background:#242526!important;color:#e4e6eb!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .table thead th {background:#303134!important;color:#b0b3b8!important}
+html[data-bs-theme="dark"] .payroll-app .table tbody tr:hover td {background:#303134!important}
+html[data-bs-theme="dark"] .payroll-app .pro-person-avatar,
+html[data-bs-theme="dark"] .payroll-app .metric-icon,
+html[data-bs-theme="dark"] .payroll-app .pro-action-icon,
+html[data-bs-theme="dark"] .payroll-app .pro-card-heading-icon {background:#303134;color:#b4c8e6}
+html[data-bs-theme="dark"] .payroll-app .pro-action-list a,
+html[data-bs-theme="dark"] .payroll-app .pro-public-link {background:#303134!important;color:#e4e6eb!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .pro-action-list a:hover,
+html[data-bs-theme="dark"] .payroll-app .dropdown-item:hover,
+html[data-bs-theme="dark"] .payroll-app .pro-top-icon:hover {background:#3a3b3c!important;color:white!important}
+html[data-bs-theme="dark"] .payroll-app .btn-light,
+html[data-bs-theme="dark"] .payroll-app .btn-light-primary,
+html[data-bs-theme="dark"] .payroll-app .bg-light,
+html[data-bs-theme="dark"] .payroll-app .bg-white,
+html[data-bs-theme="dark"] .payroll-app .pro-amount-total,
+html[data-bs-theme="dark"] .payroll-app .entry-edit-cell {background:#303134!important;color:#e4e6eb!important;border-color:#3e4042!important}
+html[data-bs-theme="dark"] .payroll-app .btn-outline-primary {color:#b4cbf0;border-color:#6689ba}
+html[data-bs-theme="dark"] .payroll-app .btn-outline-secondary {color:#d1d3d7;border-color:#606163}
+html[data-bs-theme="dark"] .payroll-app .btn-outline-secondary:hover {background:#3a3b3c;color:white}
+html[data-bs-theme="dark"] .payroll-app .btn-primary {background:#bb693e!important;border-color:#bb693e!important;color:#fff!important}
+html[data-bs-theme="dark"] .payroll-app .btn-primary:hover {background:#ce784c!important;border-color:#ce784c!important}
+html[data-bs-theme="dark"] .payroll-app .pagination .page-link {background:#303134;color:#e4e6eb;border-color:#3e4042}
+html[data-bs-theme="dark"] .payroll-app .pagination .active .page-link {background:#3b5376;color:white;border-color:#3b5376}
+html[data-bs-theme="dark"] .payroll-app .badge.status-active,
+html[data-bs-theme="dark"] .payroll-app .badge.status-present,
+html[data-bs-theme="dark"] .payroll-app .badge.status-finalized {background:#214b40!important;color:#a4e1c6!important}
+html[data-bs-theme="dark"] .payroll-app .badge.status-inactive,
+html[data-bs-theme="dark"] .payroll-app .badge.status-absent {background:#523531!important;color:#f6b0a8!important}
+html[data-bs-theme="dark"] .payroll-app .badge.status-draft,
+html[data-bs-theme="dark"] .payroll-app .badge.status-leave {background:#4d382e!important;color:#f6c3a3!important}
+html[data-bs-theme="dark"] .payroll-app .pro-empty-chart,
+html[data-bs-theme="dark"] .payroll-app .pro-empty-small {background:#242526!important}
+html[data-bs-theme="dark"] .payroll-app .pro-footer {border-color:#3e4042;color:#b0b3b8}
+html[data-bs-theme="dark"] .payroll-app .pro-footer a {color:#e4e6eb}
+@media(prefers-reduced-motion:reduce){.payroll-app .page-wrapper,.payroll-app .left-sidebar,.payroll-app .topbar{transition:none!important}}
+
+/* ================================================================
+   Payroll Pro V5 — unified admin module components
+   Added to the existing single admin theme stylesheet (not another override).
+   Uses Flexy's card/table/form primitives and the V4 design tokens.
+   ================================================================ */
+.payroll-app .pro-admin-v5{--v5-muted:var(--pro-muted,#70809b);--v5-border:var(--pro-line,#e9eef6);--v5-surface:var(--pro-white,#fff)}
+.payroll-app .pro-admin-v5 .card.pro-module-card{overflow:hidden}
+.payroll-app .pro-admin-v5 .card.pro-module-card .card-body{padding:clamp(18px,2.1vw,27px)}
+.pro-admin-v5 .pro-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}
+.pro-admin-v5 .pro-section-heading h2{font-size:18px;line-height:1.25;letter-spacing:-.45px;font-weight:800;margin:0;color:var(--pro-ink)}
+.pro-admin-v5 .pro-section-heading p{font-size:12px;line-height:1.55;color:var(--v5-muted);margin:6px 0 0}
+.pro-admin-v5 .pro-section-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:13px;background:#edf3fc;color:#092D73;font-size:23px}
+.pro-admin-v5 .pro-module-intro{display:flex;align-items:center;gap:17px;border:1px solid #dbe6f6;background:linear-gradient(105deg,#f0f5fe,#fafcff 80%);border-radius:16px;padding:17px 21px;min-height:88px}
+.pro-admin-v5 .pro-module-symbol{display:grid;place-items:center;width:50px;height:50px;flex:none;color:#fff;border-radius:14px;font-size:26px;background:#092D73;box-shadow:0 9px 18px rgba(9,45,115,.13)}
+.pro-admin-v5 .pro-module-intro>div:nth-child(2){flex:1;min-width:0}
+.pro-admin-v5 .pro-module-intro strong,.pro-admin-v5 .pro-module-intro span{display:block}
+.pro-admin-v5 .pro-module-intro>div:nth-child(2)>strong{color:#17335d;font-size:14px;font-weight:800;line-height:1.35}
+.pro-admin-v5 .pro-module-intro>div:nth-child(2)>span{font-size:12px;color:#687d9b;line-height:1.55;margin-top:3px}
+.pro-admin-v5 .pro-intro-count{flex:none;text-align:center;border-left:1px solid #d8e3f4;padding-left:20px;min-width:82px}
+.pro-admin-v5 .pro-intro-count strong{font-size:22px;line-height:1.15;color:#092D73;font-weight:850;font-variant-numeric:tabular-nums}
+.pro-admin-v5 .pro-intro-count span{font-size:10px;color:#7e8fa7;white-space:nowrap;margin-top:3px}
+.pro-admin-v5 .pro-page-chip,.pro-admin-v5 .pro-count-chip{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 11px;border:1px solid #dce5f0;border-radius:99px;background:#f1f5fb;font-size:11px;font-weight:800;color:#536c8d;white-space:nowrap}
+.pro-admin-v5 .pro-page-chip i{font-size:16px}
+.pro-admin-v5 .pro-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.pro-admin-v5 .pro-toolbar-meta{color:#8a98ae;font-size:12px;font-weight:750;white-space:nowrap}
+.pro-admin-v5 .pro-search-field{display:flex;align-items:center;flex:1 1 230px;max-width:440px;position:relative}
+.pro-admin-v5 .pro-search-field>i{position:absolute;left:14px;font-size:19px;color:#9aaac0;pointer-events:none}
+.pro-admin-v5 .pro-search-field>input{padding-left:42px!important}
+.pro-admin-v5 .pro-date-filter{max-width:200px;min-width:155px}
+.pro-admin-v5 .form-label{font-size:12px;font-weight:800;letter-spacing:.06px;color:#334d73;margin-bottom:8px}
+.pro-admin-v5 .form-control,.pro-admin-v5 .form-select{border-radius:9px;border:1px solid #dfe6ef;min-height:42px;font-size:13px;color:#284165;transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease}
+.pro-admin-v5 .form-control:focus,.pro-admin-v5 .form-select:focus{border-color:#7896c4;box-shadow:0 0 0 3px rgba(9,45,115,.09)}
+.pro-admin-v5 .form-control::placeholder{color:#9ba9bd}
+.pro-admin-v5 textarea.form-control{min-height:86px}
+.pro-admin-v5 .form-control.form-control-sm{min-height:35px;font-size:12px}
+.pro-admin-v5 .input-group-text{background:#f3f6fb;border-color:#dfe6ef;color:#617895;font-weight:800}
+.pro-admin-v5 .pro-field-optional{font-weight:500;color:#899ab1;margin-left:3px;font-size:11px}
+.pro-admin-v5 .pro-help-note,.pro-admin-v5 .form-text{display:block;font-size:11px;line-height:1.6;color:#8995a7;margin-top:7px}
+.pro-admin-v5 .pro-help-note i{font-size:14px;color:var(--pro-orange);margin-right:4px}
+.pro-admin-v5 .pro-save-actions{display:grid;gap:9px;margin-top:23px}
+.pro-admin-v5 .pro-sticky-panel{position:sticky;top:105px}
+.pro-admin-v5 .pro-table-wrap{overflow-x:auto;scrollbar-width:thin;scrollbar-color:#c9d7e8 transparent}
+.pro-admin-v5 .pro-data-table{--bs-table-border-color:#edf1f7;min-width:640px;border-collapse:separate;border-spacing:0}
+.pro-admin-v5 .pro-data-table thead th{white-space:nowrap;color:#7386a4;background:#f7f9fc;border-top:1px solid #edf1f7;border-bottom:1px solid #edf1f7;padding:14px 13px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.8px}
+.pro-admin-v5 .pro-data-table thead th:first-child{border-radius:9px 0 0 0;padding-left:16px}
+.pro-admin-v5 .pro-data-table thead th:last-child{border-radius:0 9px 0 0;padding-right:16px}
+.pro-admin-v5 .pro-data-table tbody td{padding:16px 13px;border-bottom:1px solid #edf1f7;font-size:12px;color:var(--pro-ink);vertical-align:middle;line-height:1.45}
+.pro-admin-v5 .pro-data-table tbody td:first-child{padding-left:16px}
+.pro-admin-v5 .pro-data-table tbody td:last-child{padding-right:16px}
+.pro-admin-v5 .pro-data-table tbody tr:not(.collapse):hover td{background:#f8faff}
+.pro-admin-v5 .pro-cell-primary{color:#203b63;font-size:12px;font-weight:800}
+.pro-admin-v5 .pro-tabular{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pro-admin-v5 .pro-person-cell{display:flex;align-items:center;gap:11px;min-width:185px}
+.pro-admin-v5 .pro-person-avatar{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:12px;background:#eaf1fc;color:#174984;font-size:12px;font-weight:850}
+.pro-admin-v5 .pro-person-cell strong{display:block;color:#203b63;font-size:12px}
+.pro-admin-v5 .pro-person-cell small{font-size:11px;line-height:1.5;word-break:break-word;max-width:280px}
+.pro-admin-v5 .pro-row-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pro-admin-v5 .pro-row-actions form{margin:0}
+.pro-admin-v5 .pro-row-actions .btn{white-space:nowrap}
+.pro-admin-v5 .pro-empty-state{text-align:center;padding:38px 14px 42px;max-width:370px;margin:auto}
+.pro-admin-v5 .pro-empty-state>span{display:grid;place-items:center;margin:0 auto 13px;height:58px;width:58px;background:#eef3fc;border-radius:18px;color:#315e9f;font-size:28px}
+.pro-admin-v5 .pro-empty-state h3{font-size:16px;color:#2e446a;margin:0 0 6px;font-weight:800}
+.pro-admin-v5 .pro-empty-state p{color:#8a9ab1;font-size:12px;line-height:1.6;margin:0 0 13px}
+.pro-admin-v5 .pro-pagination{display:flex;justify-content:flex-end;padding-top:16px}
+.pro-admin-v5 .pro-pagination nav{max-width:100%;overflow-x:auto}
+.pro-admin-v5 .pro-dept-list{display:grid;gap:11px}
+.pro-admin-v5 .pro-dept-item{display:flex;align-items:flex-start;gap:13px;padding:17px;border:1px solid #e8eef7;background:#fcfdff;border-radius:13px}
+.pro-admin-v5 .pro-dept-icon{width:40px;height:40px;display:grid;place-items:center;flex:none;background:#edf3fc;border-radius:12px;color:#28518d;font-size:21px}
+.pro-admin-v5 .pro-dept-main{flex:1;min-width:0}
+.pro-admin-v5 .pro-dept-name{font-weight:800;margin-bottom:7px}
+.pro-admin-v5 .pro-dept-population{display:flex;align-items:center;gap:5px;color:#7d8faa;font-weight:700;font-size:11px;margin-top:7px}
+.pro-admin-v5 .pro-dept-actions{align-self:center}
+.pro-admin-v5 .pro-inline-empty{background:#f7f9fc;border:1px dashed #d8e2ef;border-radius:11px;padding:17px;text-align:center;color:#778aa6;margin-bottom:15px}
+.pro-admin-v5 .pro-inline-empty>i{font-size:22px}
+.pro-admin-v5 .pro-inline-empty p{margin:3px 0;color:#6d7f98;font-size:12px}
+.pro-admin-v5 .pro-inline-empty a{font-size:12px;font-weight:800;color:#28518d}
+.pro-admin-v5 .pro-choice-group{display:flex;gap:8px;flex-wrap:wrap}
+.pro-admin-v5 .pro-choice{position:relative;cursor:pointer;flex:1 1 90px}
+.pro-admin-v5 .pro-choice input{position:absolute;opacity:0;width:1px;height:1px}
+.pro-admin-v5 .pro-choice span{display:flex;gap:7px;align-items:center;justify-content:center;border:1px solid #dfe7f2;padding:12px 8px;border-radius:10px;background:#fff;font-size:11px;color:#617390;font-weight:800;transition:background-color .16s,border-color .16s}
+.pro-admin-v5 .pro-choice span i{font-size:17px}
+.pro-admin-v5 .pro-choice input:checked+span{background:#eaf1fb;border-color:#7896c4;color:#092D73}
+.pro-admin-v5 .pro-choice input:focus-visible+span{outline:3px solid #de8e57;outline-offset:3px}
+.pro-admin-v5 .pro-note-cell{max-width:210px;overflow-wrap:anywhere;color:#7a8ca6}
+.pro-admin-v5 .pro-disclaimer{display:flex;align-items:flex-start;gap:11px;background:#fff8ef;border:1px solid #f3deca;color:#89542c;border-radius:12px;padding:14px 16px;font-size:12px;line-height:1.6;margin-top:20px}
+.pro-admin-v5 .pro-disclaimer>i{font-size:21px;flex:none;color:#d8873e}
+.pro-admin-v5 .pro-disclaimer strong{font-weight:850}
+.pro-admin-v5 .pro-workflow-strip{display:flex;align-items:center;gap:12px;padding:15px 19px;border:1px solid #e5eaf3;border-radius:15px;background:#fff;overflow-x:auto}
+.pro-admin-v5 .pro-workflow-strip>div{display:grid;column-gap:10px;grid-template-columns:34px max-content;grid-template-rows:auto auto;align-items:center;min-width:0}
+.pro-admin-v5 .pro-workflow-strip>div>span{display:grid;place-items:center;grid-row:1/3;width:32px;height:32px;border-radius:50%;background:#e7edf6;color:#566b89;font-weight:850;font-size:12px}
+.pro-admin-v5 .pro-workflow-strip>div>strong{font-size:11px;color:#3d5272;white-space:nowrap}
+.pro-admin-v5 .pro-workflow-strip>div>small{font-size:10px;color:#8797ad;white-space:nowrap}
+.pro-admin-v5 .pro-workflow-strip>div.is-current>span{background:#092D73;color:#fff}
+.pro-admin-v5 .pro-workflow-strip>div.is-complete>span{background:#d9eee6;color:#267051}
+.pro-admin-v5 .pro-workflow-strip>div.is-muted{opacity:.7}
+.pro-admin-v5 .pro-workflow-strip>i{font-size:15px;color:#b2c1d5}
+.pro-admin-v5 .pro-pay-kpi{display:flex;flex-direction:column;align-items:flex-start;position:relative;min-height:145px;padding:24px;background:#fff;border:1px solid #e8eef6;border-radius:15px;box-shadow:var(--pro-shadow)}
+.pro-admin-v5 .pro-pay-kpi-icon{display:grid;place-items:center;position:absolute;right:21px;top:20px;width:40px;height:40px;border-radius:12px;background:#eef3fa;color:#315c95;font-size:22px}
+.pro-admin-v5 .pro-pay-kpi>span:nth-child(2){color:#7485a0;font-size:12px;font-weight:750;padding-right:44px}
+.pro-admin-v5 .pro-pay-kpi>strong{font-size:clamp(21px,2vw,27px);color:#17355c;font-weight:850;letter-spacing:-.6px;margin-top:16px;line-height:1.3;font-variant-numeric:tabular-nums}
+.pro-admin-v5 .pro-pay-kpi>small{font-size:11px;color:#8b9ab0;margin-top:4px}
+.pro-admin-v5 .pro-form-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px}
+.pro-admin-v5 .pro-live-pay-preview{display:flex;align-items:center;gap:20px;flex-wrap:wrap;color:#788aa5;font-size:11px}
+.pro-admin-v5 .pro-live-pay-preview strong{display:block;font-weight:850;color:#17355c;font-size:17px;margin-top:2px;font-variant-numeric:tabular-nums}
+.pro-admin-v5 .pro-live-pay-preview.is-invalid strong:last-child{color:#ad4141}
+.pro-admin-v5 .pro-entry-editor{background:#f7f9fc!important;padding:22px!important}
+.pro-admin-v5 .pro-entry-editor-title{font-size:14px;font-weight:850;color:#2f4a6f;margin-bottom:15px}
+.pro-admin-v5 .pro-finalize-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:20px;background:#f5f8fc;border:1px solid #e6edf6;border-radius:13px;margin-top:20px}
+.pro-admin-v5 .pro-finalize-bar strong{display:block;color:#2e466c;font-size:13px}
+.pro-admin-v5 .pro-finalize-bar span{display:block;color:#8393aa;font-size:11px;margin-top:3px;max-width:490px}
+.pro-admin-v5 .pro-finalize-bar form{margin:0}
+/* Charcoal mode, with neutral surfaces rather than navy. */
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-module-intro,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-workflow-strip,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-pay-kpi,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-dept-item{background:#242526;border-color:#3e4042}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-module-intro>div:nth-child(2)>strong,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-intro-count strong,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-section-heading h2,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-cell-primary,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-person-cell strong,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-empty-state h3,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-pay-kpi>strong,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-live-pay-preview strong,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-entry-editor-title,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-finalize-bar strong{color:#e4e6eb!important}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-intro-count{border-color:#3e4042}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-section-icon,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-pay-kpi-icon,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-dept-icon,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-count-chip,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-page-chip,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-empty-state>span,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-person-avatar{background:#303134;color:#b9cde9;border-color:#4e4f50}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-dept-name,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-choice span,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-form-bottom .form-control{background:#303134!important;color:#e4e6eb!important;border-color:#4e4f50!important}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-choice input:checked+span{background:#3a3b3c!important;border-color:#8193ac!important;color:#fff!important}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-data-table thead th{background:#303134!important;border-color:#3e4042;color:#afb6c1!important}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-data-table tbody td{background:#242526!important;border-color:#3e4042!important;color:#e4e6eb!important}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-data-table tbody tr:not(.collapse):hover td{background:#303134!important}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-disclaimer{background:#332c25;color:#eccba7;border-color:#64503e}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-inline-empty,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-entry-editor,
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-finalize-bar{background:#303134!important;border-color:#4e4f50!important;color:#e4e6eb}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-form-control,
+html[data-bs-theme="dark"] .pro-admin-v5 .input-group-text{background:#303134!important;border-color:#4e4f50!important;color:#e4e6eb}
+html[data-bs-theme="dark"] .pro-admin-v5 .form-label{color:#d4d7dd}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-workflow-strip>div>strong{color:#e4e6eb}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-workflow-strip>div.is-current>span{background:#3a3b3c;color:#f0f2f5}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-workflow-strip>div.is-complete>span{background:#24473b;color:#a7ddc3}
+html[data-bs-theme="dark"] .pro-admin-v5 .pro-workflow-strip>div.is-muted{opacity:1}
+@media(max-width:991px){.pro-admin-v5 .pro-sticky-panel{position:static}.pro-admin-v5 .pro-dept-item{flex-wrap:wrap}.pro-admin-v5 .pro-dept-actions{margin-left:auto}}
+@media(max-width:575px){
+  .payroll-app .pro-admin-v5 .card.pro-module-card .card-body{padding:17px}
+  .pro-admin-v5 .pro-page-heading{align-items:flex-start}
+  .pro-admin-v5 .pro-module-intro{padding:14px;gap:11px;flex-wrap:wrap}
+  .pro-admin-v5 .pro-module-symbol{width:40px;height:40px;font-size:21px}
+  .pro-admin-v5 .pro-intro-count{border-left:0;border-top:1px solid #dfe7f2;width:100%;padding:10px 0 0;display:flex;align-items:center;gap:8px;text-align:left}
+  .pro-admin-v5 .pro-intro-count strong,.pro-admin-v5 .pro-intro-count span{display:inline}
+  .pro-admin-v5 .pro-toolbar>*{max-width:none}
+  .pro-admin-v5 .pro-toolbar .btn{flex:1}
+  .pro-admin-v5 .pro-toolbar-meta{width:100%;text-align:left;margin-left:0!important}
+  .pro-admin-v5 .pro-date-filter{flex:1;max-width:none}
+  .pro-admin-v5 .pro-dept-icon{display:none}
+  .pro-admin-v5 .pro-dept-actions{width:100%;justify-content:flex-end}
+  .pro-admin-v5 .pro-form-bottom .btn{width:100%}
+  .pro-admin-v5 .pro-workflow-strip{gap:9px;padding:12px}
+  .pro-admin-v5 .pro-workflow-strip>div{grid-template-columns:30px max-content}
+}
+@media(prefers-reduced-motion:reduce){.pro-admin-v5 *, .pro-admin-v5 *:before, .pro-admin-v5 *:after{transition-duration:.01ms!important;animation-duration:.01ms!important}}

@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Employee extends Model
+{
+    protected $fillable = [
+        'employee_number', 'first_name', 'last_name', 'email', 'department_id',
+        'position', 'monthly_salary_cents', 'hired_on', 'is_active', 'ended_on', 'payroll_classification',
+    ];
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean', 'hired_on' => 'date', 'ended_on' => 'date'];
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function salaryRates(): HasMany
+    {
+        return $this->hasMany(SalaryRate::class);
+    }
+
+    public function payrollEntries(): HasMany
+    {
+        return $this->hasMany(PayrollEntry::class);
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name.' '.$this->last_name);
+    }
+
+    public function currentRate(): ?SalaryRate
+    {
+        return $this->salaryRates()->whereDate('effective_on', '<=', today())->latest('effective_on')->first();
+    }
+
+    public function salaryWarning(): ?string
+    {
+        $rate = $this->currentRate();
+        if (! $rate) {
+            return 'Needs review: no current authoritative rate. Confirm an effective date.';
+        }
+        if ($rate->basis !== 'monthly' || (int) $rate->amount_cents !== (int) $this->monthly_salary_cents) {
+            return 'Legacy salary differs from authoritative salary history. Payroll uses salary_rates only.';
+        }
+
+        return null;
+    }
+}

@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Payslip</title><style>
+body{font-family:"DejaVu Sans",sans-serif;color:#18191A;font-size:10px}h1{color:#092D73}table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #ddd;text-align:left}.amount{text-align:right}.banner{padding:12px;background:#edf2fc}small{color:#444}footer{margin-top:20px}tr{page-break-inside:avoid}
+</style></head><body><h1>{{ $s['company'] }}</h1><h2>PAYSLIP · {{ $s['period']['label'] }}</h2>
+@if(($s['calculation']['policy']['compliance']??'strict')==='demo')<div class="banner">DEMO — ACADEMIC TESTING ONLY. Statutory deductions excluded. Not real payroll.</div> @endif 
+<p><strong>{{ $s['employee']['name'] }}</strong> · {{ $s['employee']['number'] }}<br>{{ $s['employee']['position'] }}<br>Cutoff: {{ $s['period']['starts_on'] }} to {{ $s['period']['ends_on'] }}</p>
+<div class="banner">Finalized: {{ \Carbon\CarbonImmutable::parse($s['finalized_at'])->timezone('Asia/Manila')->format('Y-m-d H:i:s T') }}<br>Payment status: {{ ucfirst($entry->payrollPeriod->status) }} @if($entry->payrollPeriod->status==='finalized')— payment not yet fully reconciled @endif </div>
+@if(\App\Models\PayrollCorrection::where('payroll_period_id',$entry->payroll_period_id)->where('status','approved')->exists())<div class="banner">APPROVED FULL REVERSAL: this original payslip is retained for history. Contact payroll for replacement and reconciliation.</div> @endif
+<table><thead><tr><th>Earnings / deductions</th><th>Source / calculation</th><th class="amount">PHP</th></tr></thead><tbody>
+@foreach(\App\Services\Payroll\PayslipDocument::lines($s) as $line)
+<tr><td>{{ $line['label'] }}<br><small>{{ ucfirst($line['type']) }} @if($line['type']==='employer')(employer expense; excluded from net) @endif </small></td><td><small>{{ $line['basis'] }}<br>Rule {{ $line['rule_version'] }} · {{ $line['earning_date'] }}</small></td><td class="amount">{{ \App\Support\Money::input($line['amount_cents']) }}</td></tr>
+ @endforeach </tbody></table>
+<table><tr><th>Gross earnings</th><td class="amount">{{ \App\Support\Money::input($s['totals']['gross_cents']) }}</td></tr><tr><th>Total deductions</th><td class="amount">{{ \App\Support\Money::input($s['totals']['deductions_cents']) }}</td></tr><tr><th>NET PAY</th><td class="amount"><strong>{{ \App\Support\Money::input($s['totals']['net_cents']) }}</strong></td></tr></table>
+<footer>Calculation {{ $s['calculation']['engine_version'] }} · Snapshot entry {{ $entry->id }}<br>Finalization locks the payroll amounts. Payment is recorded separately.</footer></body></html>

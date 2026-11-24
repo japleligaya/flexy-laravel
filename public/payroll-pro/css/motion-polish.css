@@ -1,0 +1,173 @@
+/*
+  Payroll Pro V7.5 — Motion system
+  Copy-and-replace UI-only update. One set of motion tokens across landing,
+  login and admin. Does not intercept navigation or submit forms.
+*/
+:root {
+  --pm-fast: 130ms;
+  --pm-normal: 190ms;
+  --pm-gentle: 270ms;
+  --pm-ease: cubic-bezier(.2, .75, .25, 1);
+  --pm-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --pm-blue-ring: rgba(9,45,115,.14);
+  --pm-soft-shadow: 0 8px 22px rgba(9,45,115,.075);
+}
+html[data-bs-theme="dark"] {
+  --pm-blue-ring: rgba(173,197,231,.15);
+  --pm-soft-shadow: 0 8px 20px rgba(0,0,0,.19);
+}
+/* A specific scope avoids modifying the Flexy login, chart, or vendor internals. */
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(
+  button:not(.btn-close), .btn, a.pl-button, .pro-primary-btn,
+  .pro-quick-add, .pro-top-icon, .pl-text-link, .pro-public-link,
+  .pro-welcome-link, .pro-quiet-link, .page-link
+) {
+  transition-property: transform, color, background-color, border-color, box-shadow, opacity, filter;
+  transition-duration: var(--pm-normal);
+  transition-timing-function: var(--pm-ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+/* All visible controls respond to press. Don't animate native select popups. */
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(button, .btn, a.pl-button, .pro-primary-btn, .pro-quick-add, .pro-top-icon, .page-link):active:not(:disabled):not(.disabled),
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(button, .btn, a.pl-button, .pro-primary-btn, .pro-quick-add, .pro-top-icon, .page-link).pro-motion-key-press {
+  transform: translateY(1px) scale(.985);
+  filter: brightness(.975);
+}
+/* Small lift on primary actions; retain the original custom landing button hover. */
+@media (hover:hover) and (pointer:fine) {
+  .payroll-app .btn:hover:not(:disabled):not(.disabled),
+  .pro-login-body .pro-primary-btn:hover:not(:disabled),
+  .pro-login-body .pro-show-password:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .payroll-app .btn:hover:not(:disabled):not(.disabled) {
+    box-shadow: var(--pm-soft-shadow);
+  }
+  .payroll-app .btn-outline-danger:hover {box-shadow: 0 7px 16px rgba(180,51,53,.10)}
+  .payroll-app .left-sidebar .sidebar-nav .sidebar-link:hover {transform: translateX(3px)}
+  .payroll-app .left-sidebar .sidebar-nav .sidebar-link.active:hover {transform: translateX(0)}
+  .pro-landing .pl-rail-item:hover:not(:disabled),
+  .pro-landing .pl-tabs button:hover:not(:disabled) {transform: translateY(-1px)}
+  .pro-landing .pl-brand:hover .pl-brand-mark,
+  .pro-login-body .pro-brand:hover .pro-brand-icon {transform: scale(1.035)}
+}
+/* Accessible click wave, drawn in a child node to avoid ::before/::after clashes
+   with the existing Flexy and Bootstrap components. */
+:is(.pro-landing,.pro-login-body,.payroll-app) .pro-motion-wave-host {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+:is(.pro-landing,.pro-login-body,.payroll-app) .pro-motion-wave-host > .pro-motion-wave {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%,-50%) scale(0);
+  animation: pm-wave 520ms var(--pm-ease-out) forwards;
+}
+@keyframes pm-wave {
+  0% { opacity: .19; transform: translate(-50%,-50%) scale(0) }
+  60% { opacity: .105 }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(var(--pm-wave-scale,24)) }
+}
+/* Arrow icons nudge in the direction of the action, no layout shift. */
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(.btn,.pl-button,.pro-primary-btn,.pl-text-link,.pro-welcome-link,.pro-quiet-link) :is(.ti-arrow-right,.ti-arrow-up-right,.ti-arrow-left) {
+  display: inline-block;
+  transition: transform var(--pm-normal) var(--pm-ease);
+}
+@media (hover:hover) and (pointer:fine) {
+  :is(.pro-landing,.pro-login-body,.payroll-app) :is(.btn,.pl-button,.pro-primary-btn,.pl-text-link,.pro-welcome-link):hover :is(.ti-arrow-right,.ti-arrow-up-right) {
+    transform: translate(3px,-1px);
+  }
+  .pro-login-body .pro-quiet-link:hover .ti-arrow-left {transform:translateX(-3px)}
+}
+/* Form state response — no changes to validation or submit behavior. */
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(.form-control,.form-select,.pl-theme-select,.pro-theme-select) {
+  transition: border-color var(--pm-normal) var(--pm-ease),
+    background-color var(--pm-normal) var(--pm-ease),
+    color var(--pm-normal) var(--pm-ease),
+    box-shadow var(--pm-normal) var(--pm-ease);
+}
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(input[type="checkbox"],input[type="radio"]) {
+  transition: transform var(--pm-fast) var(--pm-ease), box-shadow var(--pm-normal) var(--pm-ease);
+}
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(input[type="checkbox"],input[type="radio"]):active:not(:disabled) {transform:scale(.93)}
+.pro-admin-v5 .pro-choice span,
+.pro-admin-v5 .pro-dept-item,
+.payroll-app .pro-action-list a {
+  transition: background-color var(--pm-normal) var(--pm-ease),
+    border-color var(--pm-normal) var(--pm-ease),
+    box-shadow var(--pm-normal) var(--pm-ease),
+    transform var(--pm-normal) var(--pm-ease);
+}
+@media (hover:hover) and (pointer:fine) {
+  .pro-admin-v5 .pro-choice:hover span {transform:translateY(-1px)}
+  .pro-admin-v5 .pro-dept-item:hover {border-color:#c5d4e9;box-shadow:var(--pm-soft-shadow)}
+  html[data-bs-theme="dark"] .pro-admin-v5 .pro-dept-item:hover {border-color:#57595d}
+  .payroll-app .pro-action-list a:hover {transform:translateX(2px)}
+}
+/* Table rows can softly highlight without shifting numeric columns. */
+.payroll-app :is(.pro-data-table,.table) tbody td,
+.payroll-app :is(.pro-data-table,.table) tbody th {
+  transition: background-color var(--pm-fast) ease, border-color var(--pm-fast) ease;
+}
+/* Card hover stays restrained; original clickable stat-card lift is retained. */
+.payroll-app :is(.pro-surface-card,.pro-admin-v5 .card) {
+  transition: box-shadow var(--pm-gentle) var(--pm-ease), border-color var(--pm-gentle) var(--pm-ease);
+}
+.pro-landing .pl-brand-mark,
+.pro-login-body .pro-brand-icon {
+  transition: transform var(--pm-gentle) var(--pm-ease-out);
+}
+/* Native Bootstrap popups. The class is applied only while shown, and has no
+   effect on click handlers, Escape, focus traps, or ARIA state. */
+.payroll-app .dropdown-menu.show,
+.payroll-app .dropdown-menu[data-bs-popper].show,
+.pro-landing .pl-nav-links.is-open {
+  animation: pm-pop var(--pm-normal) var(--pm-ease-out) both;
+}
+@keyframes pm-pop {
+  from {opacity:.4; transform:translateY(-5px) scale(.986)}
+  to {opacity:1; transform:translateY(0) scale(1)}
+}
+.payroll-app .modal.show .modal-dialog {animation:pm-modal var(--pm-gentle) var(--pm-ease-out) both}
+@keyframes pm-modal {from {opacity:.6;transform:translateY(10px) scale(.985)} to {opacity:1;transform:translateY(0) scale(1)}}
+.payroll-app .toast.show {animation:pm-pop var(--pm-gentle) var(--pm-ease-out) both}
+:is(.pro-landing,.pro-login-body,.payroll-app) :is(.alert,.invalid-feedback,.pro-disclaimer) {
+  transition: background-color var(--pm-normal) ease, border-color var(--pm-normal) ease;
+}
+/* Existing admin submit-lock marks successful native form submission with this
+   class. A little spinner is an indicator, not a substitute for server response. */
+.payroll-app .btn.pro-is-submitting,
+.pro-login-body .pro-primary-btn[aria-busy="true"] {cursor:progress;opacity:.8}
+.payroll-app .btn.pro-is-submitting::after,
+.pro-login-body .pro-primary-btn[aria-busy="true"]::after {
+  content:"";
+  display:inline-block;
+  width:12px;height:12px;
+  margin-inline-start:8px;
+  vertical-align:-1px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  animation:pm-spin 650ms linear infinite;
+}
+@keyframes pm-spin {to{transform:rotate(360deg)}}
+/* No focus-ring suppression: focus-visible remains owned by qa-polish.css.
+   Don't animate page height, table widths, data, charts, or scroll positions. */
+@media (prefers-reduced-motion:reduce) {
+  :is(.pro-landing,.pro-login-body,.payroll-app) *,
+  :is(.pro-landing,.pro-login-body,.payroll-app) *::before,
+  :is(.pro-landing,.pro-login-body,.payroll-app) *::after {
+    transition-duration:0.01ms!important;
+    animation-duration:0.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+  }
+}
