@@ -6,6 +6,7 @@ use App\Models\AttendanceRecord;
 use App\Models\Employee;
 use App\Models\PayrollPeriod;
 use App\Services\Payroll\AgentMutation;
+use App\Services\Payroll\AttendanceDraftCalculator;
 use App\Services\Payroll\Audit;
 use App\Services\Payroll\CutoffDraft;
 use App\Services\Payroll\PayrollEngine;
@@ -28,7 +29,8 @@ final class AgentRoutineController
             'attendance-delete' => ['id' => self::ID],
             'period-create' => CutoffDraft::rules(),
             'period-cancel' => ['id' => self::ID, 'reason' => 'required|string|min:5|max:500'],
-            'engine-generate' => ['id' => self::ID],
+            'engine-generate' => ['id' => self::ID, 'prepared' => 'sometimes|required|boolean'],
+            'attendance-generate' => ['id' => self::ID],
             default => abort(404),
         };
         $execute = $stage === 'execute';
@@ -38,14 +40,14 @@ final class AgentRoutineController
         $ticket = $data['ticket'] ?? null;
         unset($data['ticket']);
         $user = $request->user();
-        $permission = str_starts_with($operation, 'attendance-') ? 'attendance' : 'payroll';
+        $permission = in_array($operation, ['attendance-create', 'attendance-delete'], true) ? 'attendance' : 'payroll';
 
         return response()->json($mutations->run($user, $permission, $operation, $data, $ticket,
             function (bool $lock) use ($operation, $data, $user, $draft) {
                 $target = match ($operation) {
                     'attendance-create' => $this->attendanceEmployee($data, $lock),
                     'attendance-delete' => $this->find(new AttendanceRecord, $data['id'], $lock),
-                    'period-cancel', 'engine-generate' => $this->find(new PayrollPeriod, $data['id'], $lock),
+                    'period-cancel', 'engine-generate', 'attendance-generate' => $this->find(new PayrollPeriod, $data['id'], $lock),
                     'period-create' => null,
                 };
                 if ($operation === 'period-create') {
@@ -57,13 +59,25 @@ final class AgentRoutineController
                 if ($operation === 'engine-generate') {
                     abort_unless($target->isDraft(), 409);
                     abort_if(app(PayrollEngine::class)->employeeQuery($target)->offset(50)->limit(1)->exists(), 422);
+                    if ($data['prepared'] ?? false) {
+                        abort_unless(AgentPreparationController::report($target, app(PayrollEngine::class))['ready'], 409);
+                    }
                 }
                 if ($operation === 'attendance-delete') {
                     abort_if($target->approved_at !== null, 409);
                 }
                 $before = $target instanceof Employee ? ['id' => (string) $target->id] : ($target ? $this->record($target) : null);
+                $revision = $target?->getRawOriginal();
+                $eligible = null;
+                if ($operation === 'attendance-generate') {
+                    abort_unless($target->isDraft(), 409);
+                    $rows = AgentPreparationController::attendanceRows($target, app(AttendanceDraftCalculator::class));
+                    $eligible = AttendanceDraftCalculator::eligibleSignature($rows);
+                    abort_if($eligible === [], 422);
+                    $revision['attendance_preview'] = $eligible;
+                }
 
-                return [$before, $target?->getRawOriginal(), function () use ($operation, $data, $target, $user, $draft) {
+                return [$before, $revision, function () use ($operation, $data, $target, $user, $draft, $eligible) {
                     $result = match ($operation) {
                         'attendance-create' => AttendanceRecord::create($data),
                         'period-create' => $draft->create($data),
@@ -74,6 +88,12 @@ final class AgentRoutineController
                     }
                     if ($operation === 'engine-generate') {
                         $created = app(PayrollWorkflow::class)->generate($result, $user);
+
+                        return ['record' => $this->record($result), 'created' => $created, 'entry_count' => $result->entries()->count()];
+                    }
+                    if ($operation === 'attendance-generate') {
+                        $created = app(AttendanceDraftCalculator::class)->generate($result, $eligible);
+                        Audit::record('agent_attendance_generate', $result, [], ['created' => $created], $user->getKey());
 
                         return ['record' => $this->record($result), 'created' => $created, 'entry_count' => $result->entries()->count()];
                     }

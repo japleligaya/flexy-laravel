@@ -352,6 +352,174 @@ class AgentIntegrationApiTest extends TestCase
         $this->get(self::API.'/audit-events', $admin)->assertOk()->assertJsonMissingPath('records.0.before');
     }
 
+    public function test_preparation_and_critical_operations_use_native_rules_and_require_the_bearer_accounts_password(): void
+    {
+        $hr = $this->account('hr');
+        $approver = $this->account('approver');
+        $officer = $this->account();
+        $hrHeaders = $this->bearer($this->login($hr)->assertOk()->json('tokens'));
+        $approverHeaders = $this->bearer($this->login($approver)->assertOk()->json('tokens'));
+        $officerHeaders = $this->bearer($this->login($officer)->assertOk()->json('tokens'));
+        $department = DB::table('departments')->insertGetId(['name' => 'Fixture']);
+        $employee = $this->employee('C-1', $department);
+        $period = $this->cutoff('2026-08-01', '2026-08-15', 'draft');
+        $this->get(self::API."/preparation/$period", $officerHeaders)->assertOk()
+            ->assertJsonPath('record.ready', false)->assertJsonPath('record.checked', 1);
+        $this->get(self::API."/preparation/$period", $hrHeaders)->assertForbidden();
+        $salary = ['id' => (string) $employee, 'effective_on' => '2026-08-01', 'basis' => 'daily',
+            'amount' => '100.00', 'reason' => 'Fixture salary'];
+        $preview = self::API.'/pay-input/salary-rate';
+        $ticket = $this->postJson($preview.'/preview', $salary, $hrHeaders)->assertOk()->json('ticket');
+        $this->postJson($preview.'/execute', $salary + ['ticket' => $ticket], $hrHeaders)->assertUnprocessable();
+        $this->postJson($preview.'/execute', $salary + ['ticket' => $ticket, 'password' => 'incorrect'], $hrHeaders)->assertForbidden();
+        $this->assertDatabaseCount('salary_rates', 0);
+        $this->postJson($preview.'/execute', $salary + ['ticket' => $ticket, 'password' => self::PASSWORD], $hrHeaders)
+            ->assertOk()->assertJsonPath('record.amount_cents', 10000);
+        $attendance = DB::table('attendance_records')->insertGetId(['employee_id' => $employee, 'work_date' => '2026-08-05',
+            'status' => 'present', 'overtime_minutes' => 20]);
+        $approval = ['id' => (string) $attendance, 'approved_overtime_minutes' => 10, 'paid_leave' => false, 'reason' => 'Fixture approval'];
+        $approve = self::API.'/pay-input/attendance-approve';
+        $this->postJson($approve.'/preview', $approval, $hrHeaders)->assertForbidden();
+        $this->postJson($approve.'/preview', ['approved_overtime_minutes' => 21] + $approval, $approverHeaders)->assertUnprocessable();
+        $ticket = $this->postJson($approve.'/preview', $approval, $approverHeaders)->assertOk()->json('ticket');
+        $this->postJson($approve.'/execute', $approval + ['ticket' => $ticket, 'password' => self::PASSWORD], $approverHeaders)
+            ->assertOk()->assertJsonPath('record.approved', true);
+        $this->get(self::API."/attendance-draft-preview/$period", $officerHeaders)->assertOk()->assertJsonPath('record.eligible', 1);
+        $generation = self::API.'/routine/attendance-generate';
+        $batch = ['id' => (string) $period];
+        $ticket = $this->postJson($generation.'/preview', $batch, $officerHeaders)->assertOk()->json('ticket');
+        $this->postJson($generation.'/execute', $batch + ['ticket' => $ticket], $officerHeaders)->assertOk()->assertJsonPath('created', 1);
+        DB::table('payroll_periods')->where('id', $period)->update(['status' => 'review']);
+        $reject = self::API.'/workflow/reject';
+        $payload = $batch + ['reason' => 'Fixture return to draft'];
+        $ticket = $this->postJson($reject.'/preview', $payload, $approverHeaders)->assertOk()->json('ticket');
+        $this->postJson($reject.'/execute', $payload + ['ticket' => $ticket, 'password' => self::PASSWORD], $approverHeaders)
+            ->assertOk()->assertJsonPath('record.status', 'draft');
+        $this->assertDatabaseHas('audit_events', ['action' => 'reject', 'actor_id' => $approver->id]);
+        $this->assertDatabaseCount('payroll_payments', 0);
+
+        $entry = (string) DB::table('payroll_entries')->where('payroll_period_id', $period)->value('id');
+        DB::table('payroll_entries')->where('id', $entry)->update(['source' => 'manual']);
+        $this->get(self::API."/recalculation-preview/$entry", $officerHeaders)->assertOk()
+            ->assertJsonPath('record.id', $entry);
+        $recalculate = self::API.'/entry-workflow/recalculate';
+        $ticket = $this->postJson($recalculate.'/preview', ['id' => $entry], $officerHeaders)->assertOk()->json('ticket');
+        $this->postJson($recalculate.'/execute', ['id' => $entry, 'ticket' => $ticket, 'password' => self::PASSWORD], $officerHeaders)
+            ->assertOk()->assertJsonPath('record.id', $entry);
+
+        $finalized = $this->cutoff('2026-08-16', '2026-08-31', 'finalized');
+        DB::table('payroll_periods')->where('id', $finalized)->update(['snapshot' => '{"policy":{"compliance":"manual"},"net_cents":10000}']);
+        DB::table('payroll_entries')->insert(['employee_id' => $employee, 'payroll_period_id' => $finalized,
+            'base_pay_cents' => 10000, 'snapshot' => '{"totals":{"net_cents":10000}}']);
+        $payment = ['id' => (string) $finalized, 'paid_on' => '2026-08-31', 'method' => 'bank',
+            'reference' => 'FIXTURE-PAID', 'amount' => '100.00', 'reason' => 'Verified fixture payment'];
+        $path = self::API.'/workflow/payment';
+        $ticket = $this->postJson($path.'/preview', $payment, $approverHeaders)->assertOk()->json('ticket');
+        $this->postJson($path.'/execute', $payment + ['ticket' => $ticket, 'password' => self::PASSWORD], $approverHeaders)
+            ->assertOk()->assertJsonPath('payment_verified', true)->assertJsonPath('record.status', 'paid');
+        $this->assertDatabaseHas('payroll_payments', ['reference' => 'FIXTURE-PAID', 'confirmed_by' => $approver->id, 'amount_cents' => 10000]);
+        $report = $this->get(self::API."/document-files/report/$finalized", $officerHeaders)->assertOk()->assertDownload("payroll-period-$finalized.csv");
+        $this->assertStringContainsString('Employee #', $report->streamedContent());
+        $this->get(self::API."/document-files/report/$finalized", $hrHeaders)->assertForbidden();
+
+        $admin = $this->bearer($this->login($this->account('super_admin'))->assertOk()->json('tokens'));
+        $policy = ['effective_on' => '2026-08-01', 'company_name' => 'Fixture', 'frequency' => 'monthly',
+            'proration' => 'calendar_days', 'workdays' => [1, 2, 3, 4, 5], 'hours_per_day' => 8, 'monthly_attendance' => 'not_required',
+            'paid_leave' => 'approved_only', 'ot_approval' => 'required', 'contribution_timing' => 'monthly',
+            'compliance' => 'manual', 'labor_review' => 'ordinary_only', 'separate_approver' => true, 'reason' => 'Fixture policy change'];
+        $path = self::API.'/policy-operations/settings';
+        $this->postJson($path.'/preview', ['separate_approver' => false] + $policy, $admin)->assertUnprocessable();
+        $ticket = $this->postJson($path.'/preview', $policy, $admin)->assertOk()->json('ticket');
+        $this->postJson($path.'/execute', $policy + ['ticket' => $ticket, 'password' => self::PASSWORD], $admin)
+            ->assertOk()->assertJsonPath('record.frequency', 'monthly');
+        $adjustment = ['type' => 'allowance', 'label' => 'Fixture allowance', 'amount' => '2.00', 'effective_on' => '2026-08-01',
+            'recurring' => false, 'taxable' => false, 'contributory' => false, 'reason' => 'Fixture allowance reason'];
+        $path = self::API.'/policy-operations/adjustment';
+        $ticket = $this->postJson($path.'/preview', $adjustment, $officerHeaders)->assertOk()->json('ticket');
+        $this->postJson($path.'/execute', $adjustment + ['ticket' => $ticket, 'password' => self::PASSWORD], $officerHeaders)
+            ->assertOk()->assertJsonPath('record.amount_cents', 200);
+    }
+
+    public function test_agent_entry_lifecycle_uses_native_approval_and_delivers_official_pdf(): void
+    {
+        $officer = $this->account();
+        $approver = $this->account('approver');
+        $hr = $this->account('hr');
+        $administrator = $this->account('super_admin');
+        $officerHeaders = $this->bearer($this->login($officer)->assertOk()->json('tokens'));
+        $approverHeaders = $this->bearer($this->login($approver)->assertOk()->json('tokens'));
+        $hrHeaders = $this->bearer($this->login($hr)->assertOk()->json('tokens'));
+        $adminHeaders = $this->bearer($this->login($administrator)->assertOk()->json('tokens'));
+        \App\Models\PayrollSetting::create(['policy' => PayrollEngineV9Test::policy(['separate_approver' => true]),
+            'created_by' => $administrator->id]);
+        $department = DB::table('departments')->insertGetId(['name' => 'Synthetic Payroll']);
+        $employee = $this->employee('DEMO-1', $department);
+        $second = $this->employee('DEMO-2', $department);
+        foreach ([$employee, $second] as $id) {
+            DB::table('employees')->where('id', $id)->update(['hired_on' => '2026-11-01', 'is_active' => true]);
+            \App\Models\Employee::findOrFail($id)->salaryRates()->create(['effective_on' => '2026-11-01', 'basis' => 'monthly',
+                'amount_cents' => 2000000, 'reason' => 'Synthetic salary rate', 'created_by' => $administrator->id]);
+        }
+        $period = $this->cutoff('2026-11-01', '2026-11-30', 'draft');
+        $periodArgs = ['id' => (string) $period];
+        $entryArgs = ['period_id' => (string) $period, 'employee_id' => (string) $employee];
+        $this->getJson(self::API."/entry-employees?period_id=$period&q=DEMO-1", $officerHeaders)->assertOk()
+            ->assertJsonPath('records.0.id', (string) $employee)->assertJsonMissingPath('records.0.email');
+        $this->getJson(self::API."/entry-employees?period_id=$period", $hrHeaders)->assertForbidden();
+        $this->postJson(self::API.'/entry-changes/generate/preview', $entryArgs, $hrHeaders)->assertForbidden();
+
+        $preview = function (string $operation, array $args, array $headers): TestResponse {
+            return $this->postJson(self::API."/$operation/preview", $args, $headers)->assertOk();
+        };
+        $execute = function (string $operation, array $args, array $headers, string $ticket, string $password = self::PASSWORD): TestResponse {
+            return $this->postJson(self::API."/$operation/execute", $args + ['ticket' => $ticket, 'password' => $password], $headers);
+        };
+        $generated = $preview('entry-changes/generate', $entryArgs, $officerHeaders)
+            ->assertJsonPath('target.candidate_net_cents', 2000000)->assertJsonPath('target.exceptions', 0);
+        $this->assertDatabaseCount('payroll_entries', 0);
+        $entry = $execute('entry-changes/generate', $entryArgs, $officerHeaders, $generated->json('ticket'))
+            ->assertOk()->assertJsonPath('record.source', 'engine')->json('record.id');
+        $execute('entry-changes/generate', $entryArgs, $officerHeaders, $generated->json('ticket'))->assertConflict();
+        $this->getJson(self::API."/documents/payslip/$entry", $officerHeaders)->assertNotFound();
+        $manual = ['period_id' => (string) $period, 'employee_id' => (string) $second, 'base_pay' => '20000',
+            'overtime_pay' => '0', 'allowances' => '10.00', 'deductions' => '0', 'notes' => 'Synthetic manual test amounts'];
+        $manualTicket = $preview('entry-changes/create', $manual, $adminHeaders)->json('ticket');
+        $manualId = $execute('entry-changes/create', $manual, $adminHeaders, $manualTicket)->assertOk()
+            ->assertJsonPath('record.source', 'manual')->json('record.id');
+        $edit = ['id' => $manualId, 'allowances' => '20.00', 'notes' => 'Synthetic authorized edit'];
+        $ticket = $preview('entry-changes/update', $edit, $adminHeaders)->assertJsonPath('target.candidate_net_cents', 2002000)->json('ticket');
+        $execute('entry-changes/update', ['allowances' => '40'] + $edit, $adminHeaders, $ticket)->assertConflict();
+        $execute('entry-changes/update', $edit, $adminHeaders, $ticket)->assertOk()->assertJsonPath('record.net_cents', 2002000);
+        foreach ([$entry, $manualId] as $id) {
+            $review = ['id' => $id];
+            $ticket = $preview('entry-workflow/review', $review, $officerHeaders)->json('ticket');
+            $execute('entry-workflow/review', $review, $officerHeaders, $ticket)->assertOk()->assertJsonPath('record.reviewed', true);
+        }
+        $this->postJson(self::API.'/entry-changes/update/preview', $edit, $adminHeaders)->assertUnprocessable();
+        $net = $this->getJson(self::API."/workflow-status/$period", $officerHeaders)->assertOk()->json('record.batch_net_cents');
+        $batch = $periodArgs + ['confirmed_net' => $net];
+        $ticket = $preview('workflow/submit', $batch, $adminHeaders)->json('ticket');
+        $execute('workflow/submit', $batch, $adminHeaders, $ticket)->assertOk()->assertJsonPath('record.status', 'review');
+        $ticket = $preview('workflow/approve', $periodArgs, $adminHeaders)->json('ticket');
+        $execute('workflow/approve', $periodArgs, $adminHeaders, $ticket)->assertUnprocessable();
+        $ticket = $preview('workflow/approve', $periodArgs, $approverHeaders)->json('ticket');
+        $execute('workflow/approve', $periodArgs, $approverHeaders, $ticket)->assertOk()->assertJsonPath('record.status', 'approved');
+        $ticket = $preview('workflow/finalize', $batch, $approverHeaders)->json('ticket');
+        $execute('workflow/finalize', $batch, $approverHeaders, $ticket, 'wrong-password')->assertForbidden();
+        $execute('workflow/finalize', $batch, $approverHeaders, $ticket)->assertOk()->assertJsonPath('record.status', 'finalized');
+        $this->getJson(self::API."/documents/payslip/$entry", $approverHeaders)->assertOk()->assertExactJson(['document_id' => $entry]);
+        $response = $this->get(self::API."/document-files/payslip/$entry", $approverHeaders)
+            ->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertDownload("payslip-$entry.pdf");
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+        $this->assertNoStore($response);
+        $this->get(self::API."/document-files/payslip/$entry", $hrHeaders)->assertForbidden();
+        $employeeAccount = $this->account('employee');
+        $employeeAccount->update(['employee_id' => $employee]);
+        $employeeHeaders = $this->bearer($this->login($employeeAccount)->assertOk()->json('tokens'));
+        $this->get(self::API."/document-files/payslip/$manualId", $employeeHeaders)->assertNotFound();
+        $this->get(self::API."/document-files/payslip/$entry", $employeeHeaders)->assertOk()->assertDownload("payslip-$entry.pdf");
+    }
+
     private function employee(string $number, int $department): int
     {
         return DB::table('employees')->insertGetId(['employee_number' => $number, 'department_id' => $department,

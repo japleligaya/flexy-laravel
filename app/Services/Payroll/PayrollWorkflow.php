@@ -43,7 +43,7 @@ final class PayrollWorkflow
                     continue;
                 }
                 $calculation = $this->engine->calculate($employee, $period);
-                $period->entries()->create(['employee_id' => $employee->id, 'source' => 'engine', 'calculation' => $calculation] + $this->money($calculation));
+                $this->createCalculated($period, $employee->id, $calculation);
                 $count++;
             }
             Audit::record('batch_generated', $period, [], ['created' => $count], $actor?->getKey());
@@ -55,6 +55,12 @@ final class PayrollWorkflow
     public function money(array $c): array
     {
         return array_intersect_key($c['totals'], array_flip(['base_pay_cents', 'overtime_pay_cents', 'allowances_cents', 'deductions_cents']));
+    }
+
+    public function createCalculated(PayrollPeriod $period, int $employeeId, array $calculation): PayrollEntry
+    {
+        return $period->entries()->create(['employee_id' => $employeeId, 'source' => 'engine',
+            'calculation' => $calculation] + $this->money($calculation));
     }
 
     public function candidate(PayrollEntry $entry): array

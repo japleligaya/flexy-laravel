@@ -11,6 +11,7 @@ use App\Models\PayrollPeriod;
 use App\Models\PayrollSetting;
 use App\Models\SalaryRate;
 use App\Services\Payroll\AgentTokenService;
+use App\Services\Payroll\PayrollEngine;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -146,6 +147,23 @@ final class AgentDirectoryController
 
         return $this->page($period->entries()->getQuery()->select('id', 'employee_id', 'reviewed_at'), $query, fn (PayrollEntry $row) => [
             'id' => (string) $row->id, 'employee_id' => (string) $row->employee_id, 'reviewed' => $row->reviewed_at !== null,
+        ]);
+    }
+
+    public function entryEmployees(Request $request, PayrollEngine $engine): JsonResponse
+    {
+        $query = $this->paging($request, ['period_id' => $this->idRule(), 'q' => 'sometimes|required|string|max:100']);
+        $period = PayrollPeriod::findOrFail($query['period_id']);
+        abort_unless($period->isDraft(), 409);
+        $rows = $engine->employeeQuery($period)->select('id', 'employee_number', 'first_name', 'last_name');
+        foreach (preg_split('/\s+/', trim($query['q'] ?? ''), 6, PREG_SPLIT_NO_EMPTY) as $term) {
+            $search = '%'.$term.'%';
+            $rows->where(fn (Builder $q) => $q->whereLike('first_name', $search)
+                ->orWhereLike('last_name', $search)->orWhereLike('employee_number', $search));
+        }
+
+        return $this->page($rows, $query, fn (Employee $employee) => [
+            'id' => (string) $employee->id, 'employee_number' => $employee->employee_number, 'name' => $employee->full_name,
         ]);
     }
 

@@ -58,7 +58,7 @@ final class AgentEmployeeController
                     $original = $target ? $this->record($target) : [];
                     // For profile edits, keep the legacy salary unchanged and validate dates together.
                     $validated = Validator::make($incoming + $original + [
-                        'monthly_salary' => $create ? ($body['monthly_salary'] ?? null) : '0',
+                        'monthly_salary' => $create ? ($body['monthly_salary'] ?? '0') : '0',
                     ], Employee::rules($target))->validate();
                     if ($create) {
                         abort_unless(Money::toCents((string) $validated['monthly_salary']) === 0, 422);

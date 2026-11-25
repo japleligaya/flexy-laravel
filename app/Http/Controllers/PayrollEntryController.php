@@ -5,43 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\PayrollEntry;
 use App\Models\PayrollPeriod;
 use App\Services\Payroll\Audit;
-use App\Services\Payroll\ManualCalculation;
-use App\Support\Money;
+use App\Services\Payroll\ManualDraftEntry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class PayrollEntryController extends Controller
 {
-    public function store(Request $request, PayrollPeriod $payrollPeriod): RedirectResponse
+    public function store(Request $request, PayrollPeriod $payrollPeriod, ManualDraftEntry $manual): RedirectResponse
     {
-        $data = $this->validated($request, $payrollPeriod);
-        DB::transaction(function () use ($payrollPeriod, $data) {
-            $period = $this->lockDraft($payrollPeriod);
-            if ($period->entries()->where('employee_id', $data['employee_id'])->exists()) {
-                throw ValidationException::withMessages(['employee_id' => 'Employee already has an entry in this period.']);
-            }
-            $entry = $period->entries()->create($data + ['source' => 'manual']);
-            $entry->update(['calculation' => app(ManualCalculation::class)->calculate($entry)]);
-        });
+        $manual->save($payrollPeriod, null, $request->all());
 
         return back()->with('success', 'Payroll entry added. Amounts are manually entered, not statutory calculations.');
     }
 
-    public function update(Request $request, PayrollPeriod $payrollPeriod, PayrollEntry $payrollEntry): RedirectResponse
+    public function update(Request $request, PayrollPeriod $payrollPeriod, PayrollEntry $payrollEntry, ManualDraftEntry $manual): RedirectResponse
     {
         $this->ensureBelongs($payrollPeriod, $payrollEntry);
-        $data = $this->validated($request, $payrollPeriod, false);
-        DB::transaction(function () use ($payrollPeriod, $payrollEntry, $data) {
-            $this->lockDraft($payrollPeriod);
-            if ($payrollEntry->fresh()->reviewed_at) {
-                throw ValidationException::withMessages(['period' => 'Reopen the review explicitly before changing this entry.']);
-            }
-            $payrollEntry->update($data + ['source' => 'manual', 'calculation' => null, 'reviewed_at' => null, 'reviewed_by' => null]);
-            $payrollEntry->update(['calculation' => app(ManualCalculation::class)->calculate($payrollEntry->fresh())]);
-        });
+        $manual->save($payrollPeriod, $payrollEntry, $request->all());
 
         return back()->with('success', 'Payroll entry updated.');
     }
@@ -60,31 +42,6 @@ class PayrollEntryController extends Controller
         });
 
         return back()->with('success', 'Draft payroll entry removed.');
-    }
-
-    private function validated(Request $request, PayrollPeriod $period, bool $creating = true): array
-    {
-        $rules = [
-            'base_pay' => ['required', 'regex:/^\d{1,9}(?:\.\d{1,2})?$/D'],
-            'overtime_pay' => ['required', 'regex:/^\d{1,9}(?:\.\d{1,2})?$/D'],
-            'allowances' => ['required', 'regex:/^\d{1,9}(?:\.\d{1,2})?$/D'],
-            'deductions' => ['required', 'regex:/^\d{1,9}(?:\.\d{1,2})?$/D'],
-            'notes' => ['required', 'string', 'min:10', 'max:500'],
-        ];
-        if ($creating) {
-            $rules['employee_id'] = ['required', 'integer', Rule::exists('employees', 'id')->where('is_active', true)];
-        }
-        $data = $request->validate($rules);
-        foreach (['base_pay', 'overtime_pay', 'allowances', 'deductions'] as $field) {
-            $data[$field.'_cents'] = Money::toCents((string) $data[$field]);
-            unset($data[$field]);
-        }
-        $gross = $data['base_pay_cents'] + $data['overtime_pay_cents'] + $data['allowances_cents'];
-        if ($data['deductions_cents'] > $gross) {
-            throw ValidationException::withMessages(['deductions' => 'Deductions cannot exceed gross pay.']);
-        }
-
-        return $data;
     }
 
     private function lockDraft(PayrollPeriod $payrollPeriod): PayrollPeriod
