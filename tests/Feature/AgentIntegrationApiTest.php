@@ -147,6 +147,19 @@ class AgentIntegrationApiTest extends TestCase
         $this->get(self::API.'/payroll-periods/999999', $headers)->assertNotFound()->assertJsonPath('error.code', 'not_found');
     }
 
+    public function test_next_draft_lists_current_and_future_drafts_earliest_first(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-24 16:00:00', 'UTC'));
+        $this->cutoff('2026-11-10', '2026-11-24', 'draft');
+        $current = $this->cutoff('2026-11-20', '2026-11-25', 'draft');
+        $this->cutoff('2026-11-25', '2026-11-30', 'finalized');
+        $next = $this->cutoff('2026-12-01', '2026-12-15', 'draft');
+        $headers = $this->bearer($this->login($this->account())->assertOk()->json('tokens'));
+        $this->get(self::API.'/payroll-periods?next_draft=1', $headers)->assertOk()
+            ->assertJsonCount(2, 'records')->assertJsonPath('records.0.id', (string) $current)
+            ->assertJsonPath('records.1.id', (string) $next);
+    }
+
     public function test_invalid_inputs_and_unknown_routes_return_sanitized_json_without_an_accept_header(): void
     {
         $headers = $this->bearer($this->login($this->account())->assertOk()->json('tokens'));
@@ -207,6 +220,12 @@ class AgentIntegrationApiTest extends TestCase
         $record = $this->get(self::API."/employees?q=001&active=1&department_id=$department", $hr)->assertOk()->json('records');
         $this->assertSame([['id' => (string) $employee, 'employee_number' => '001', 'name' => 'Fixture Employee',
             'department_id' => (string) $department, 'active' => true]], $record);
+        $this->get(self::API.'/employees?count_only=1', $hr)->assertOk()
+            ->assertExactJson(['statistics' => ['employee_count' => 2]]);
+        $this->get(self::API.'/employees?count_only=1&q=001', $hr)->assertOk()
+            ->assertExactJson(['statistics' => ['employee_count' => 1]]);
+        $this->get(self::API.'/employees?q=Fixture%20Employee', $hr)->assertOk()->assertJsonCount(2, 'records');
+        $this->get(self::API.'/employees?count_only=1&page=2', $hr)->assertUnprocessable();
         $this->get(self::API.'/attendance?date=2026-08-01&status=present', $hr)->assertOk()
             ->assertJsonCount(1, 'records')->assertJsonMissingPath('records.0.notes');
         $this->get(self::API.'/attendance?date=2026-02-30', $hr)->assertUnprocessable();
@@ -220,6 +239,7 @@ class AgentIntegrationApiTest extends TestCase
         ]);
         $this->get(self::API."/payslips?employee_id=$other", $personal)->assertUnprocessable();
         $this->get(self::API.'/employees', $personal)->assertForbidden();
+        $this->get(self::API.'/employees?count_only=1', $personal)->assertForbidden();
         $linked->update(['employee_id' => null]);
         $this->get(self::API.'/payslips', $personal)->assertForbidden();
         $officer = $this->bearer($this->login($this->account())->assertOk()->json('tokens'));

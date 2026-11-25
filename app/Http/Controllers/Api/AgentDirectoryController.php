@@ -58,19 +58,22 @@ final class AgentDirectoryController
             'q' => 'sometimes|required|string|max:100',
             'department_id' => $this->idRule(false),
             'active' => 'sometimes|required|in:0,1',
+            'count_only' => 'sometimes|required|in:0,1',
         ]);
         $rows = Employee::select('id', 'employee_number', 'first_name', 'last_name', 'department_id', 'is_active')
             ->orderBy('last_name')->orderBy('first_name');
-        if (isset($query['q'])) {
-            $search = '%'.$query['q'].'%';
-            $rows->where(fn (Builder $q) => $q->whereLike('first_name', $search)
-                ->orWhereLike('last_name', $search)->orWhereLike('employee_number', $search));
-        }
+        $this->employeeSearch($rows, $query['q'] ?? '');
         if (isset($query['department_id'])) {
             $rows->where('department_id', $query['department_id']);
         }
         if (isset($query['active'])) {
             $rows->where('is_active', $query['active'] === '1');
+        }
+
+        if (($query['count_only'] ?? null) === '1') {
+            abort_if(isset($query['page']), 422);
+
+            return response()->json(['statistics' => ['employee_count' => $rows->reorder()->count()]]);
         }
 
         return $this->page($rows, $query, fn (Employee $row) => [
@@ -156,11 +159,7 @@ final class AgentDirectoryController
         $period = PayrollPeriod::findOrFail($query['period_id']);
         abort_unless($period->isDraft(), 409);
         $rows = $engine->employeeQuery($period)->select('id', 'employee_number', 'first_name', 'last_name');
-        foreach (preg_split('/\s+/', trim($query['q'] ?? ''), 6, PREG_SPLIT_NO_EMPTY) as $term) {
-            $search = '%'.$term.'%';
-            $rows->where(fn (Builder $q) => $q->whereLike('first_name', $search)
-                ->orWhereLike('last_name', $search)->orWhereLike('employee_number', $search));
-        }
+        $this->employeeSearch($rows, $query['q'] ?? '');
 
         return $this->page($rows, $query, fn (Employee $employee) => [
             'id' => (string) $employee->id, 'employee_number' => $employee->employee_number, 'name' => $employee->full_name,
@@ -199,6 +198,15 @@ final class AgentDirectoryController
     private function idRule(bool $required = true): array
     {
         return [...($required ? [] : ['sometimes']), 'required', 'regex:/\A[1-9][0-9]{0,18}\z/', 'integer', 'min:1'];
+    }
+
+    private function employeeSearch(Builder $rows, string $name): void
+    {
+        foreach (preg_split('/\s+/', trim($name), 6, PREG_SPLIT_NO_EMPTY) as $term) {
+            $search = '%'.$term.'%';
+            $rows->where(fn (Builder $query) => $query->whereLike('first_name', $search)
+                ->orWhereLike('last_name', $search)->orWhereLike('employee_number', $search));
+        }
     }
 
     private function query(Request $request, array $rules = []): array
