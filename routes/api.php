@@ -49,6 +49,7 @@ Route::prefix('v1/integrations/agent')->group(function () {
         ['/verified-attendance-approval/{id}', AgentPayInputController::class, 'attendance', 'approve'],
         ['/salary-rates', AgentDirectoryController::class, 'salaryRates', 'salary'],
         ['/salary-rate-details', AgentDirectoryController::class, 'salaryDetails', 'salary'],
+        ['/payroll-adjustments', AgentDirectoryController::class, 'adjustments', 'payroll'],
         ['/payroll-entries', AgentDirectoryController::class, 'entries', 'read'],
         ['/payslips', AgentDirectoryController::class, 'payslips', 'own_payslips'],
         ['/reports', AgentPayrollPeriodController::class, 'index', 'export'],

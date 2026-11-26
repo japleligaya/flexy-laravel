@@ -17,6 +17,27 @@ class AgentIntegrationApiTest extends TestCase
 
     private const PASSWORD = 'isolated-test-password';
 
+    public function test_adjustments_read_filters_kind_and_preserves_employee_boundaries(): void
+    {
+        $department = DB::table('departments')->insertGetId(['name' => 'Fixture operations']);
+        $employee = $this->employee('FIX-101', $department);
+        $other = $this->employee('FIX-102', $department);
+        $base = ['type' => 'allowance', 'amount_cents' => 15000, 'effective_on' => '2026-11-01',
+            'taxable' => false, 'contributory' => false, 'reason' => 'Private fixture reason'];
+        DB::table('payroll_adjustments')->insert([
+            $base + ['employee_id' => $employee, 'label' => 'Meal allowance'],
+            array_replace($base, ['type' => 'deduction', 'employee_id' => null, 'label' => 'Global deduction']),
+            $base + ['employee_id' => $other, 'label' => 'Other employee allowance'],
+        ]);
+        $hr = $this->login($this->account('hr'))->assertOk()->json('tokens');
+        $officer = $this->login($this->account('payroll_officer'))->assertOk()->json('tokens');
+        $url = self::API.'/payroll-adjustments?employee_id='.$employee.'&type=allowance';
+        $this->getJson($url, $this->bearer($hr))->assertForbidden();
+        $this->getJson($url, $this->bearer($officer))->assertOk()->assertJsonCount(1, 'records')
+            ->assertJsonPath('records.0.label', 'Meal allowance')->assertJsonPath('records.0.amount_cents', 15000)
+            ->assertJsonMissingPath('records.0.reason')->assertJsonMissingPath('records.0.employee_id');
+    }
+
     public function test_runtime_binding_requires_a_current_admin_and_expires_and_throttles(): void
     {
         $this->freezeTime();

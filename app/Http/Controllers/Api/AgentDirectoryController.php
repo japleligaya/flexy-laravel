@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\AttendanceRecord;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\PayrollAdjustment;
 use App\Models\PayrollCorrection;
 use App\Models\PayrollEntry;
 use App\Models\PayrollPeriod;
@@ -124,6 +125,33 @@ final class AgentDirectoryController
         return $this->page($rows, $query, fn (SalaryRate $row) => [
             'id' => (string) $row->id, 'effective_on' => $row->effective_on->toDateString(), 'basis' => $row->basis,
             'amount_cents' => (int) $row->amount_cents, 'reason' => $row->reason,
+        ]);
+    }
+
+    public function adjustments(Request $request): JsonResponse
+    {
+        $query = $this->paging($request, [
+            'employee_id' => $this->idRule(),
+            'type' => 'sometimes|required|in:allowance,bonus,deduction,holiday,night,thirteenth',
+        ]);
+        Employee::select('id')->findOrFail($query['employee_id']);
+        $rows = PayrollAdjustment::query()
+            ->select('id', 'employee_id', 'label', 'type', 'amount_cents', 'effective_on', 'ends_on', 'recurring')
+            ->where(fn (Builder $records) => $records->whereNull('employee_id')->orWhere('employee_id', $query['employee_id']))
+            ->orderByDesc('effective_on');
+        if (isset($query['type'])) {
+            $rows->where('type', $query['type']);
+        }
+
+        return $this->page($rows, $query, fn (PayrollAdjustment $row) => [
+            'id' => (string) $row->id,
+            'scope' => $row->employee_id === null ? 'Company-wide' : 'Employee',
+            'label' => $row->label,
+            'type' => $row->type,
+            'amount_cents' => (int) $row->amount_cents,
+            'effective_on' => $row->effective_on->toDateString(),
+            'ends_on' => $row->ends_on?->toDateString(),
+            'recurring' => $row->recurring,
         ]);
     }
 
