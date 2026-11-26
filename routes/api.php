@@ -67,6 +67,13 @@ Route::prefix('v1/integrations/agent')->group(function () {
     Route::post('/routine/{operation}/{stage}', AgentRoutineController::class)
         ->whereIn('operation', ['attendance-create', 'attendance-delete', 'period-create', 'period-cancel', 'engine-generate', 'attendance-generate'])
         ->whereIn('stage', ['preview', 'execute'])->middleware(AgentIntegrationToken::class);
+    Route::get('/synthetic/batch-receipts/{kind}/{digest}', [AgentSyntheticEmployeeBatchController::class, 'receipt'])
+        ->whereIn('kind', ['employee-create', 'employee-update', 'employee-delete', 'period-create', 'plan'])
+        ->middleware(AgentIntegrationToken::class);
+    Route::post('/synthetic/operation-plans/{stage}', [AgentSyntheticEmployeeBatchController::class, 'plan'])
+        ->whereIn('stage', ['preview', 'execute'])->middleware(AgentIntegrationToken::class.':bearer,people');
+    Route::post('/synthetic/payroll-period-batches/{stage}', [AgentSyntheticEmployeeBatchController::class, 'periods'])
+        ->whereIn('stage', ['preview', 'execute'])->middleware(AgentIntegrationToken::class.':bearer,payroll');
     Route::post('/synthetic/employee-batches/{operation}/{stage}', AgentSyntheticEmployeeBatchController::class)
         ->whereIn('operation', ['create', 'update', 'delete'])->whereIn('stage', ['preview', 'execute'])
         ->middleware(AgentIntegrationToken::class.':bearer,people');

@@ -13,6 +13,7 @@ return [
     |
     */
 
+    'agent_synthetic_batch_stop' => env('ADI_SYNTHETIC_BATCH_STOP_FILE'),
     'agent_synthetic_batches' => env('ADI_PAYROLLGO_SYNTHETIC_BATCHES', false),
     'agent_synthetic_batch_limit' => env('ADI_PAYROLLGO_SYNTHETIC_BATCH_LIMIT', 50),
 

@@ -73,6 +73,42 @@ class AgentIntegrationApiTest extends TestCase
         $this->assertSame(35, DB::table('employees')->whereIn('id', $groups[2]['ids'])->where('position', '!=', 'Synthetic Reviewer')->count());
     }
 
+    public function test_synthetic_plan_rolls_back_completed_steps_on_second_step_failure(): void
+    {
+        config(['app.agent_synthetic_batches' => true]);
+        $user = $this->account('super_admin');
+        $token = $this->login($user)->assertOk()->json('tokens');
+        $headers = $this->bearer($token);
+        $body = ['batch_id' => (string) \Illuminate\Support\Str::uuid(), 'tasks' => [
+            ['operation' => 'employee_create', 'count' => 2],
+            ['operation' => 'period_create', 'periods' => [
+                ['label' => 'Synthetic period A', 'starts_on' => '2027-02-01', 'ends_on' => '2027-02-15'],
+                ['label' => 'Synthetic period B', 'starts_on' => '2027-02-16', 'ends_on' => '2027-02-28'],
+            ]],
+        ]];
+        $root = self::API.'/synthetic/operation-plans/';
+        $receipt = self::API.'/synthetic/batch-receipts/plan/';
+        $preview = $this->postJson($root.'preview', $body, $headers)->assertOk()->json();
+        $digest = $preview['target']['digest'];
+        DB::unprepared("CREATE TEMP TRIGGER reject_fixture_period BEFORE INSERT ON payroll_periods
+            WHEN NEW.label = 'Synthetic period B' BEGIN SELECT RAISE(ABORT, 'fixture rollback'); END");
+        try {
+            $execute = $body + ['ticket' => $preview['ticket'], 'approved_digest' => $digest];
+            $this->postJson($root.'execute', $execute, $headers + ['X-ADI-Synthetic-Approval' => self::PASSWORD])->assertServerError();
+            $this->assertDatabaseCount('employees', 0);
+            $this->assertDatabaseCount('payroll_periods', 0);
+            $this->getJson($receipt.$digest, $headers)->assertNotFound();
+        } finally {
+            DB::unprepared('DROP TRIGGER reject_fixture_period');
+        }
+        $fresh = $this->postJson($root.'preview', $body, $headers)->assertOk()->json();
+        $result = $this->postJson($root.'execute', $body + ['ticket' => $fresh['ticket'], 'approved_digest' => $fresh['target']['digest']],
+            $headers + ['X-ADI-Synthetic-Approval' => self::PASSWORD])->assertOk()->json();
+        $this->getJson($receipt.$fresh['target']['digest'], $headers)->assertOk()->assertExactJson($result);
+        $other = $this->login($this->account('super_admin'))->assertOk()->json('tokens');
+        $this->getJson($receipt.$fresh['target']['digest'], $this->bearer($other))->assertNotFound();
+    }
+
     public function test_login_and_identity_use_an_independent_opaque_bearer_token(): void
     {
         $this->freezeTime();
