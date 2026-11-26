@@ -58,6 +58,12 @@ return [
 
     'url' => env('APP_URL', env('VERCEL_URL') ? 'https://'.env('VERCEL_URL') : 'http://localhost'),
 
+    'agent_runtime_binding' => [
+        'expires_at' => env('PAYROLLGO_RUNTIME_BINDING_EXPIRES_AT'),
+        'deployment' => env('VERCEL_URL'),
+        'production' => (string) env('VERCEL') === '1' && env('VERCEL_ENV') === 'production',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

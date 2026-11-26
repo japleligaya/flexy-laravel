@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\Payroll\RuntimeDatabaseBinding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
@@ -15,6 +16,65 @@ class AgentIntegrationApiTest extends TestCase
     private const API = '/api/v1/integrations/agent';
 
     private const PASSWORD = 'isolated-test-password';
+
+    public function test_runtime_binding_requires_a_current_admin_and_expires_and_throttles(): void
+    {
+        $this->freezeTime();
+        $path = self::API.'/diagnostics/runtime-binding';
+        $admin = $this->bearer($this->login($this->account('super_admin'))->assertOk()->json('tokens'));
+        $officer = $this->bearer($this->login($this->account('payroll_officer'))->assertOk()->json('tokens'));
+        config([
+            'app.agent_runtime_binding.production' => true,
+            'app.agent_runtime_binding.deployment' => 'payrollgo-test.vercel.app',
+        ]);
+        $this->get($path, $admin)->assertNotFound()->assertHeader('Cache-Control', 'no-store, private');
+        config(['app.agent_runtime_binding.expires_at' => now()->timestamp + 1801]);
+        $this->get($path, $admin)->assertNotFound();
+        config(['app.agent_runtime_binding.expires_at' => now()->timestamp + 120]);
+        $this->get($path)->assertUnauthorized();
+        $this->get($path, $officer)->assertForbidden();
+        $this->get($path.'?extra=1', $admin)->assertUnprocessable();
+        config(['app.agent_runtime_binding.production' => false]);
+        $this->get($path, $admin)->assertNotFound();
+        config(['app.agent_runtime_binding.production' => true]);
+
+        $payload = [
+            'runtime_host_sha256' => hash('sha256', 'example.test'),
+            'database' => 'neondb',
+            'schema_name' => 'public',
+            'runtime_deployment' => 'payrollgo-test.vercel.app',
+            'api_version' => 'v1',
+        ];
+        $this->mock(RuntimeDatabaseBinding::class)
+            ->shouldReceive('read')->with(DB::connection(), 'payrollgo-test.vercel.app')->times(3)->andReturn($payload);
+        for ($i = 0; $i < 3; $i++) {
+            $this->get($path, $admin)->assertOk()->assertExactJson($payload)
+                ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('Vercel-CDN-Cache-Control', 'no-store');
+        }
+        $this->get($path, $admin)->assertTooManyRequests()
+            ->assertHeader('Retry-After')->assertHeader('Cache-Control', 'no-store, private');
+        $this->travel(120)->seconds();
+        $this->get($path, $admin)->assertNotFound();
+    }
+
+    public function test_runtime_binding_reports_only_metadata_from_the_primary_connection(): void
+    {
+        $pdo = new \PDO('sqlite::memory:');
+        $pdo->sqliteCreateFunction('current_database', fn () => 'reported-db');
+        $pdo->sqliteCreateFunction('current_schema', fn () => 'reported-schema');
+        $connection = new \Illuminate\Database\Connection($pdo, 'configured-db', '', [
+            'driver' => 'pgsql',
+            'host' => 'Example.Test',
+        ]);
+
+        $this->assertSame([
+            'runtime_host_sha256' => hash('sha256', 'example.test'),
+            'database' => 'reported-db',
+            'schema_name' => 'reported-schema',
+            'runtime_deployment' => 'payrollgo-test.vercel.app',
+            'api_version' => 'v1',
+        ], (new RuntimeDatabaseBinding)->read($connection, 'payrollgo-test.vercel.app'));
+    }
 
     public function createApplication()
     {

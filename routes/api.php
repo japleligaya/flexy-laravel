@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\AgentPolicyController;
 use App\Http\Controllers\Api\AgentPayInputController;
 use App\Http\Controllers\Api\AgentPayrollPeriodController;
 use App\Http\Controllers\Api\AgentRoutineController;
+use App\Http\Controllers\Api\AgentRuntimeBindingController;
 use App\Http\Middleware\AgentIntegrationToken;
 use App\Http\Controllers\Api\AgentSyntheticEmployeeBatchController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,7 @@ Route::prefix('v1/integrations/agent')->group(function () {
 
     Route::middleware(AgentIntegrationToken::class)->group(function () {
         Route::get('/auth/me', [AgentAuthController::class, 'me']);
+        Route::get('/diagnostics/runtime-binding', AgentRuntimeBindingController::class);
     });
     foreach ([
         ['/payroll-periods', AgentPayrollPeriodController::class, 'index', 'read'],
