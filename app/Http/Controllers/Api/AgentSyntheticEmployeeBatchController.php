@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\User;
 use App\Models\PayrollPeriod;
@@ -72,17 +73,23 @@ final class AgentSyntheticEmployeeBatchController
                 $rows = [];
                 if ($operation === 'create') {
                     abort_unless($targets->isEmpty(), 409);
+                    $departments = Department::where('name', 'like', 'Synthetic %')->orderBy('id')->limit(8)->pluck('id');
                     foreach (range(1, $args['count']) as $ordinal) {
+                        $number = $prefix.str_pad((string) $ordinal, 2, '0', STR_PAD_LEFT);
                         $record = [
-                            'employee_number' => $prefix.str_pad((string) $ordinal, 2, '0', STR_PAD_LEFT),
+                            'employee_number' => $number,
                             'first_name' => 'Synthetic',
-                            'last_name' => 'Employee '.$ordinal,
+                            'last_name' => 'Employee '.['Cedar', 'Harbor', 'Meadow', 'Hill'][($ordinal - 1) % 4].' '.$ordinal,
+                            'email' => strtolower($number).'@example.test',
+                            'department_id' => $departments->isEmpty() ? null : $departments[($ordinal - 1) % $departments->count()],
+                            'payroll_classification' => 'unverified',
                             'position' => 'Synthetic '.['Analyst', 'Coordinator', 'Assistant'][($ordinal - 1) % 3],
                             'monthly_salary' => '0',
                             'is_active' => '0',
                         ];
                         $validated = Validator::make($record, Employee::rules())->validate();
                         unset($validated['monthly_salary']);
+                        if ($validated['department_id'] !== null) $validated['department_id'] = (string) $validated['department_id'];
                         $rows[] = $validated + ['monthly_salary_cents' => 0];
                     }
                 } else {
@@ -90,7 +97,8 @@ final class AgentSyntheticEmployeeBatchController
                     abort_unless($targets->count() === count($args['ids']), 404);
                     foreach ($targets as $row) {
                         abort_unless($row->first_name === 'Synthetic' && ! $row->is_active &&
-                            (int) $row->monthly_salary_cents === 0 && $row->email === null, 409);
+                            (int) $row->monthly_salary_cents === 0 && ($row->email === null ||
+                                $row->email === strtolower($row->employee_number).'@example.test'), 409);
                         abort_if($operation === 'delete' &&
                             ($row->hasPayrollHistory() || User::where('employee_id', $row->id)->exists()), 409);
                         if ($operation === 'update') {

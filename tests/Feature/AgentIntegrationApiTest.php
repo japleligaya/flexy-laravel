@@ -43,6 +43,10 @@ class AgentIntegrationApiTest extends TestCase
             $args = ['batch_id' => $uuid(), 'count' => $count];
             $plan = $preview('create', $args);
             $this->assertCount($count, array_unique(array_column($plan['target']['records'], 'employee_number')));
+            $this->assertCount($count, array_unique(array_column($plan['target']['records'], 'email')));
+            $this->assertTrue(collect($plan['target']['records'])->every(fn ($record) =>
+                str_ends_with($record['email'], '@example.test') && $record['payroll_classification'] === 'unverified'
+            ));
             $execution = $payload($args, $plan);
             $this->postJson($root.'create/execute', $execution, $headers)->assertForbidden();
             $this->postJson($root.'create/execute', array_replace($execution, ['approved_digest' => str_repeat('0', 64)]), $approve)->assertConflict();
