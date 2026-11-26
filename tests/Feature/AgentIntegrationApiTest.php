@@ -326,6 +326,11 @@ class AgentIntegrationApiTest extends TestCase
         $this->get(self::API.'/payroll-periods?next_draft=1', $headers)->assertOk()
             ->assertJsonCount(2, 'records')->assertJsonPath('records.0.id', (string) $current)
             ->assertJsonPath('records.1.id', (string) $next);
+        $this->get(self::API.'/payroll-periods/count?period_status=draft', $headers)->assertOk()->assertExactJson([
+            'statistics' => ['cutoff_count' => 3],
+        ]);
+        $this->get(self::API.'/payroll-periods/count', $headers)->assertOk()->assertJsonPath('statistics.cutoff_count', 4);
+        $this->get(self::API.'/payroll-periods/count?period_status=unknown', $headers)->assertUnprocessable();
     }
 
     public function test_invalid_inputs_and_unknown_routes_return_sanitized_json_without_an_accept_header(): void

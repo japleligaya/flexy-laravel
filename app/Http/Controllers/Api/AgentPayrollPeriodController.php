@@ -45,6 +45,20 @@ final class AgentPayrollPeriodController
         return response()->json(['record' => $this->record($period)]);
     }
 
+    public function count(Request $request): JsonResponse
+    {
+        $input = Validator::make(['query' => $request->query()], [
+            'query' => ['array:period_status'],
+            'query.period_status' => ['sometimes', 'required', 'in:draft,review,approved,finalized,paid,cancelled'],
+        ])->validate();
+        $periods = PayrollPeriod::query();
+        if (isset($input['query']['period_status'])) {
+            $periods->where('status', $input['query']['period_status']);
+        }
+
+        return response()->json(['statistics' => ['cutoff_count' => $periods->count()]]);
+    }
+
     private function record(PayrollPeriod $period): array
     {
         return [

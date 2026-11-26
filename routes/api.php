@@ -28,6 +28,7 @@ Route::prefix('v1/integrations/agent')->group(function () {
     });
     foreach ([
         ['/payroll-periods', AgentPayrollPeriodController::class, 'index', 'read'],
+        ['/payroll-periods/count', AgentPayrollPeriodController::class, 'count', 'read'],
         ['/payroll-periods/{id}', AgentPayrollPeriodController::class, 'show', 'read'],
         ['/capabilities', AgentDirectoryController::class, 'permissions', null],
         ['/dashboard', AgentDirectoryController::class, 'dashboard', 'dashboard'],
