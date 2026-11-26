@@ -13,6 +13,9 @@ return [
     |
     */
 
+    'agent_synthetic_batches' => env('ADI_PAYROLLGO_SYNTHETIC_BATCHES', false),
+    'agent_synthetic_batch_limit' => env('ADI_PAYROLLGO_SYNTHETIC_BATCH_LIMIT', 50),
+
     'name' => env('APP_NAME', 'Laravel'),
 
     /*

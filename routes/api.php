@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\AgentPayInputController;
 use App\Http\Controllers\Api\AgentPayrollPeriodController;
 use App\Http\Controllers\Api\AgentRoutineController;
 use App\Http\Middleware\AgentIntegrationToken;
+use App\Http\Controllers\Api\AgentSyntheticEmployeeBatchController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1/integrations/agent')->group(function () {
@@ -66,6 +67,9 @@ Route::prefix('v1/integrations/agent')->group(function () {
     Route::post('/routine/{operation}/{stage}', AgentRoutineController::class)
         ->whereIn('operation', ['attendance-create', 'attendance-delete', 'period-create', 'period-cancel', 'engine-generate', 'attendance-generate'])
         ->whereIn('stage', ['preview', 'execute'])->middleware(AgentIntegrationToken::class);
+    Route::post('/synthetic/employee-batches/{operation}/{stage}', AgentSyntheticEmployeeBatchController::class)
+        ->whereIn('operation', ['create', 'update', 'delete'])->whereIn('stage', ['preview', 'execute'])
+        ->middleware(AgentIntegrationToken::class.':bearer,people');
     Route::post('/employees/{operation}/{stage}', AgentEmployeeController::class)
         ->whereIn('operation', ['create', 'update', 'delete'])->whereIn('stage', ['preview', 'execute'])
         ->middleware(AgentIntegrationToken::class.':bearer,people');

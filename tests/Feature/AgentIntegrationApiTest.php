@@ -26,6 +26,53 @@ class AgentIntegrationApiTest extends TestCase
         return $app;
     }
 
+    public function test_synthetic_batch_atomic_lifecycle_and_scope(): void
+    {
+        $this->freezeTime();
+        $token = $this->login($this->account('super_admin'))->assertOk()->json('tokens');
+        $headers = $this->bearer($token);
+        $root = self::API.'/synthetic/employee-batches/';
+        $uuid = fn () => (string) \Illuminate\Support\Str::uuid();
+        $this->postJson($root.'create/preview', ['batch_id' => $uuid(), 'count' => 1], $headers)->assertNotFound();
+        config(['app.agent_synthetic_batches' => true]);
+        $approve = $headers + ['X-ADI-Synthetic-Approval' => self::PASSWORD];
+        $preview = fn ($op, $args) => $this->postJson($root.$op.'/preview', $args, $headers)->assertOk()->json();
+        $payload = fn ($args, $plan) => $args + ['ticket' => $plan['ticket'], 'approved_digest' => $plan['target']['digest']];
+        $groups = [];
+        foreach ([1, 20, 35] as $count) {
+            $args = ['batch_id' => $uuid(), 'count' => $count];
+            $plan = $preview('create', $args);
+            $this->assertCount($count, array_unique(array_column($plan['target']['records'], 'employee_number')));
+            $execution = $payload($args, $plan);
+            $this->postJson($root.'create/execute', $execution, $headers)->assertForbidden();
+            $this->postJson($root.'create/execute', array_replace($execution, ['approved_digest' => str_repeat('0', 64)]), $approve)->assertConflict();
+            $receipt = $this->postJson($root.'create/execute', $execution, $approve)->assertOk()->assertJsonPath('verified', $count)->json();
+            $this->assertSame($count, DB::table('employees')->whereIn('id', $receipt['ids'])->where('monthly_salary_cents', 0)->where('is_active', false)->count());
+            $this->postJson($root.'create/execute', $execution, $approve)->assertConflict();
+            $groups[] = ['batch_id' => $args['batch_id'], 'ids' => $receipt['ids']];
+        }
+        $this->assertDatabaseCount('employees', 56);
+        $this->postJson($root.'update/preview', ['batch_id' => $groups[0]['batch_id'],
+            'ids' => $groups[1]['ids'], 'position' => 'Synthetic Reviewer'], $headers)->assertNotFound();
+        $this->postJson($root.'update/preview', ['batch_id' => $groups[0]['batch_id'],
+            'ids' => [$groups[0]['ids'][0], $groups[0]['ids'][0]], 'position' => 'Synthetic Reviewer'], $headers)->assertUnprocessable();
+
+        $single = $groups[0] + ['position' => 'Synthetic Reviewer'];
+        $stale = $preview('update', $single);
+        $this->travel(6)->minutes();
+        $this->postJson($root.'update/execute', $payload($single, $stale), $approve)->assertConflict();
+        foreach ([$groups[0], $groups[1]] as $group) {
+            $change = $group + ['position' => 'Synthetic Reviewer'];
+            $this->postJson($root.'update/execute', $payload($change, $preview('update', $change)), $approve)
+                ->assertOk()->assertJsonPath('verified', count($group['ids']));
+            $this->assertSame(count($group['ids']), DB::table('employees')->whereIn('id', $group['ids'])->where('position', 'Synthetic Reviewer')->count());
+            $this->postJson($root.'delete/execute', $payload($group, $preview('delete', $group)), $approve)
+                ->assertOk()->assertJsonPath('verified', count($group['ids']));
+        }
+        $this->assertDatabaseCount('employees', 35);
+        $this->assertSame(35, DB::table('employees')->whereIn('id', $groups[2]['ids'])->where('position', '!=', 'Synthetic Reviewer')->count());
+    }
+
     public function test_login_and_identity_use_an_independent_opaque_bearer_token(): void
     {
         $this->freezeTime();
