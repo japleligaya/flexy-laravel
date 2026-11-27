@@ -56,3 +56,6 @@ backups/
 *.pem
 *.p12
 *.key
+
+.vercel
+.env*
