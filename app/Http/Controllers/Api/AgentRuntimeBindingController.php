@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Services\Payroll\RuntimeDatabaseBinding;
 use Illuminate\Cache\RateLimiter;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 final class AgentRuntimeBindingController
 {
-    public function __invoke(Request $request, RuntimeDatabaseBinding $binding): JsonResponse
+    public function __invoke(Request $request, RuntimeDatabaseBinding $binding): Response
     {
         $deployment = config('app.agent_runtime_binding.deployment');
         $expiresAt = filter_var(config('app.agent_runtime_binding.expires_at'), FILTER_VALIDATE_INT);
@@ -28,7 +29,9 @@ final class AgentRuntimeBindingController
             abort(429, '', ['Retry-After' => (string) max(1, $limiter->availableIn($key))]);
         }
 
-        return response()->json($binding->read(DB::connection(), $deployment), 200, [
+        Log::channel('stderr')->notice('payrollgo.runtime_binding', $binding->read(DB::connection(), $deployment));
+
+        return response()->noContent(204, [
             'Cache-Control' => 'no-store',
             'Vercel-CDN-Cache-Control' => 'no-store',
         ]);

@@ -2,7 +2,10 @@
 
 namespace App\Services\Payroll;
 
+use App\Http\Controllers\Api\AgentAuthController;
 use Illuminate\Database\Connection;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use PDO;
 
 class RuntimeDatabaseBinding
@@ -12,6 +15,8 @@ class RuntimeDatabaseBinding
         $host = $connection->getConfig('host');
         abort_unless($connection->getDriverName() === 'pgsql'
             && is_string($host) && preg_match('/\A[a-z0-9.-]+\z/i', $host), 503);
+        $route = Route::getRoutes()->match(Request::create('/api/v1/integrations/agent/auth/me', 'GET'));
+        abort_unless($route->getActionName() === AgentAuthController::class.'@me', 503);
 
         $statement = $connection->getPdo()->query(
             'SELECT current_database() AS database_name, current_schema() AS schema_name'

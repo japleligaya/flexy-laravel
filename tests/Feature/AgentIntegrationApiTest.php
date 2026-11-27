@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\Payroll\RuntimeDatabaseBinding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -68,8 +69,11 @@ class AgentIntegrationApiTest extends TestCase
         ];
         $this->mock(RuntimeDatabaseBinding::class)
             ->shouldReceive('read')->with(DB::connection(), 'payrollgo-test.vercel.app')->times(3)->andReturn($payload);
+        $stderr = \Mockery::mock(\Psr\Log\LoggerInterface::class);
+        $stderr->shouldReceive('notice')->with('payrollgo.runtime_binding', $payload)->times(3);
+        Log::shouldReceive('channel')->with('stderr')->times(3)->andReturn($stderr);
         for ($i = 0; $i < 3; $i++) {
-            $this->get($path, $admin)->assertOk()->assertExactJson($payload)
+            $this->get($path, $admin)->assertNoContent()
                 ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('Vercel-CDN-Cache-Control', 'no-store');
         }
         $this->get($path, $admin)->assertTooManyRequests()
