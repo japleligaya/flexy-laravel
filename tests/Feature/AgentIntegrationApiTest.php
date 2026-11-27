@@ -71,7 +71,7 @@ class AgentIntegrationApiTest extends TestCase
             ->shouldReceive('read')->with(DB::connection(), 'payrollgo-test.vercel.app')->times(3)->andReturn($payload);
         $stderr = \Mockery::mock(\Psr\Log\LoggerInterface::class);
         $stderr->shouldReceive('notice')->with('payrollgo.runtime_binding', $payload)->times(3);
-        Log::shouldReceive('channel')->with('stderr')->times(3)->andReturn($stderr);
+        Log::shouldReceive('channel')->with('agent_binding')->times(3)->andReturn($stderr);
         for ($i = 0; $i < 3; $i++) {
             $this->get($path, $admin)->assertNoContent()
                 ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('Vercel-CDN-Cache-Control', 'no-store');

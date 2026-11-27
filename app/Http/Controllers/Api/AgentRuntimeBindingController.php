@@ -29,7 +29,7 @@ final class AgentRuntimeBindingController
             abort(429, '', ['Retry-After' => (string) max(1, $limiter->availableIn($key))]);
         }
 
-        Log::channel('stderr')->notice('payrollgo.runtime_binding', $binding->read(DB::connection(), $deployment));
+        Log::channel('agent_binding')->notice('payrollgo.runtime_binding', $binding->read(DB::connection(), $deployment));
 
         return response()->noContent(204, [
             'Cache-Control' => 'no-store',
